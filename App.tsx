@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext, useEffect, useMemo } from "react"
+import { useState, useCallback, useEffect } from "react"
 import {
   StyleSheet,
   Text,
@@ -7,169 +7,16 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
-  Dimensions,
   LogBox,
 } from "react-native"
 
 import { StatusBar } from "expo-status-bar"
 
-import {
-  LiveKitRoom,
-  useTracks,
-  useParticipants,
-  RoomContext,
-  VideoTrack,
-} from "@livekit/react-native"
-import { Track } from "livekit-client"
+import { LiveKitRoom } from "@livekit/react-native"
 
-import type { AppConfig, ConnectionState, VideoControlsState } from "./types"
+import { ActiveRoom } from "./components/room/ActiveRoom"
 
-const { width, height } = Dimensions.get("window")
-
-const tracksOption: Track.Source[] = [
-  Track.Source.Camera,
-  Track.Source.ScreenShare,
-  Track.Source.Microphone,
-]
-
-// Компонент для отображения участников (Participant)
-function VideoConference() {
-  const participants = useParticipants()
-  const tracks = useTracks(tracksOption)
-
-  if (tracks.length === 0) {
-    return (
-      <View style={styles.noVideo}>
-        <Text style={styles.noVideoText}>No video streams available</Text>
-      </View>
-    )
-  }
-
-  return (
-    <View style={styles.participantsContainer}>
-      {tracks.map((track) => (
-        <View key={track.participant.sid} style={styles.participantContainer}>
-          <VideoTrack
-            style={styles.videoView}
-            trackRef={track}
-            mirror={track.participant.isLocal}
-          />
-
-          <Text style={styles.participantName}>
-            {track.participant.name || track.participant.identity}
-            {track.participant.isLocal ? " (You)" : ""}
-          </Text>
-        </View>
-      ))}
-    </View>
-  )
-}
-
-const initialVideoControlsState: VideoControlsState = {
-  isMuted: false,
-  isVideoEnabled: true,
-  isSpeaking: false,
-}
-
-// Компонент панели управления (ControlBar)
-function ControlBar() {
-  const room = useContext(RoomContext)
-  const [controlsState, setControlsState] = useState<VideoControlsState>(
-    () => initialVideoControlsState
-  )
-
-  const toggleMute = useCallback(async (): Promise<void> => {
-    if (!room) return
-
-    try {
-      await room.localParticipant.setMicrophoneEnabled(!controlsState.isMuted)
-      setControlsState((prev) => ({ ...prev, isMuted: !prev.isMuted }))
-    } catch (error) {
-      console.error("Error toggling microphone: ", error)
-      Alert.alert("Error", "Failed to toggle microphone")
-    }
-  }, [room, controlsState.isMuted])
-
-  const toggleVideo = useCallback(async (): Promise<void> => {
-    if (!room) return
-
-    try {
-      await room.localParticipant.setCameraEnabled(
-        !controlsState.isVideoEnabled
-      )
-      setControlsState((prev) => ({
-        ...prev,
-        isVideoEnabled: !prev.isVideoEnabled,
-      }))
-    } catch (error) {
-      console.error("Error toggling camera: ", error)
-      Alert.alert("Error", "Failed to toggle camera")
-    }
-  }, [room, controlsState.isVideoEnabled])
-
-  const disconnect = useCallback(async (): Promise<void> => {
-    if (!room) return
-
-    try {
-      await room.disconnect()
-    } catch (error) {
-      console.error("Error disconnecting: ", error)
-    }
-  }, [room])
-
-  return (
-    <View style={styles.controlsContainer}>
-      <TouchableOpacity
-        style={[
-          styles.controlButton,
-          controlsState.isMuted && styles.controlButtonActive,
-        ]}
-        onPress={toggleMute}
-        accessibilityLabel={
-          controlsState.isMuted ? "Unmute microphone" : "Mute microphone"
-        }
-      >
-        <Text style={styles.controlButtonText}>
-          {controlsState.isMuted ? "Unmute" : "Mute"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.controlButton,
-          !controlsState.isVideoEnabled && styles.controlButtonActive,
-        ]}
-        onPress={toggleVideo}
-        accessibilityLabel={
-          controlsState.isVideoEnabled ? "Stop video" : "Start video"
-        }
-      >
-        <Text style={styles.controlButtonText}>
-          {controlsState.isVideoEnabled ? "Stop Video" : "Start Video"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.controlButton, styles.disconnectButton]}
-        onPress={disconnect}
-        accessibilityLabel="Disconnect from room"
-      >
-        <Text style={styles.controlButtonText}>Disconnect</Text>
-      </TouchableOpacity>
-    </View>
-  )
-}
-
-// Главный компонент комнаты (ActiveRoom)
-function RoomView() {
-  return (
-    <SafeAreaView style={styles.roomContainer}>
-      <VideoConference />
-      <ControlBar />
-      <StatusBar style="light" />
-    </SafeAreaView>
-  )
-}
+import type { AppConfig, ConnectionState } from "./types"
 
 const initialConfig: AppConfig = {
   url: "",
@@ -182,7 +29,7 @@ const initialConnectionState: ConnectionState = {
 }
 
 // Главный компонент приложения
-export default function App() {
+export default () => {
   const [config, setConfig] = useState<AppConfig>(() => initialConfig)
   const [connectionState, setConnectionState] = useState<ConnectionState>(
     () => initialConnectionState
@@ -247,12 +94,12 @@ export default function App() {
       <LiveKitRoom
         serverUrl={config.url}
         token={config.token}
-        connect={true}
+        connect
         onDisconnected={onDisconnect}
         onError={onConnectionError}
         options={{}}
       >
-        <RoomView />
+        <ActiveRoom />
       </LiveKitRoom>
     )
   }
@@ -382,88 +229,6 @@ const styles = StyleSheet.create({
   connectButtonText: {
     color: "#fff",
     fontSize: 18,
-    fontWeight: "600",
-  },
-  helpContainer: {
-    marginTop: 40,
-    alignItems: "center",
-  },
-  roomContainer: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  header: {
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    padding: 15,
-    alignItems: "center",
-  },
-  headerText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  participantsContainer: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: 10,
-  },
-  participantContainer: {
-    width: width / 2 - 15,
-    height: height / 3,
-    margin: 5,
-    backgroundColor: "#333",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  videoView: {
-    flex: 1,
-  },
-  participantName: {
-    position: "absolute",
-    bottom: 10,
-    left: 10,
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  noVideo: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  noVideoText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  controlsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-  },
-  controlButton: {
-    backgroundColor: "#333",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    minWidth: 80,
-    alignItems: "center",
-  },
-  controlButtonActive: {
-    backgroundColor: "#FF3B30",
-  },
-  disconnectButton: {
-    backgroundColor: "#FF3B30",
-  },
-  controlButtonText: {
-    color: "#fff",
-    fontSize: 14,
     fontWeight: "600",
   },
 })
