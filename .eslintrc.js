@@ -36,22 +36,12 @@ module.exports = {
         ],
         pathGroups: [
           {
-            pattern: "react",
+            pattern: "{react,react/*,react-native,react-native/*}",
             group: "external",
             position: "before",
           },
           {
-            pattern: "react-native",
-            group: "external",
-            position: "before",
-          },
-          {
-            pattern: "expo",
-            group: "external",
-            position: "before",
-          },
-          {
-            pattern: "expo-*",
+            pattern: "{expo,expo-*}",
             group: "external",
             position: "before",
           },
@@ -71,8 +61,8 @@ module.exports = {
             position: "after",
           },
         ],
-        pathGroupsExcludedImportTypes: ["react", "react-native"],
-        "newlines-between": "ignore",
+        pathGroupsExcludedImportTypes: ["react"],
+        "newlines-between": "always",
         warnOnUnassignedImports: true,
         alphabetize: {
           order: "asc",
@@ -113,7 +103,16 @@ module.exports = {
     "@typescript-eslint/no-empty-function": "off",
 
     // Prettier rules
-    "prettier/prettier": "error",
+    "prettier/prettier": [
+      "error",
+      {},
+      {
+        "usePrettierrc": true,
+        "fileInfoOptions": {
+          "withNodeModules": true
+        }
+      }
+    ],
 
     // General rules
     "no-console": "warn",

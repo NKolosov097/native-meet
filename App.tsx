@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react"
-
 import {
   Alert,
   LogBox,
@@ -16,6 +15,7 @@ import { StatusBar } from "expo-status-bar"
 import { LiveKitRoom } from "@livekit/react-native"
 
 import { ActiveRoom } from "./components/room/ActiveRoom"
+
 import type { AppConfig, ConnectionState } from "./types"
 
 const initialConfig: AppConfig = {

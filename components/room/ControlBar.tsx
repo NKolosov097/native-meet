@@ -1,10 +1,7 @@
 import { useCallback, useContext, useState } from "react"
-
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
-import { RoomContext } from "@livekit/react-native"
-
-import { VideoControlsState } from "../../types"
+import type { VideoControlsState } from "../../types"
 
 const initialVideoControlsState: VideoControlsState = {
   isMuted: false,
