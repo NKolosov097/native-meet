@@ -3,7 +3,7 @@ import { Dimensions, StyleSheet, Text, View } from "react-native"
 import { VideoTrack, useTracks } from "@livekit/react-native"
 import { Track } from "livekit-client"
 
-import { BACKGROUND_COLORS, TEXT_COLORS } from "../../constants/colors"
+import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
 const { width, height } = Dimensions.get("window")
 

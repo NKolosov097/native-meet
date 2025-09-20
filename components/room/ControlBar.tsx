@@ -3,9 +3,9 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 import { useRoomContext } from "@livekit/react-native"
 
-import { BACKGROUND_COLORS, TEXT_COLORS } from "../../constants/colors"
+import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
-import type { VideoControlsState } from "../../types"
+import type { VideoControlsState } from "@/types"
 
 const initialVideoControlsState: VideoControlsState = {
   isMuted: false,
