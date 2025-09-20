@@ -1,5 +1,9 @@
-import { useCallback, useContext, useState } from "react"
+import { useCallback, useState } from "react"
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+
+import { useRoomContext } from "@livekit/react-native"
+
+import { BACKGROUND_COLORS, TEXT_COLORS } from "../../constants/colors"
 
 import type { VideoControlsState } from "../../types"
 
@@ -10,7 +14,7 @@ const initialVideoControlsState: VideoControlsState = {
 }
 
 export const ControlBar = () => {
-  const room = useContext(RoomContext)
+  const room = useRoomContext()
   const [controlsState, setControlsState] = useState<VideoControlsState>(
     () => initialVideoControlsState,
   )
@@ -103,10 +107,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: BACKGROUND_COLORS.tertiary,
   },
   controlButton: {
-    backgroundColor: "#333",
+    backgroundColor: BACKGROUND_COLORS.secondary,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
@@ -114,14 +118,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   controlButtonActive: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: TEXT_COLORS.danger,
   },
   controlButtonText: {
-    color: "#fff",
+    color: TEXT_COLORS.light,
     fontSize: 14,
     fontWeight: "600",
   },
   disconnectButton: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: TEXT_COLORS.danger,
   },
 })

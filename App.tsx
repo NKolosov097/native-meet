@@ -14,6 +14,12 @@ import { StatusBar } from "expo-status-bar"
 
 import { LiveKitRoom } from "@livekit/react-native"
 
+import {
+  BACKGROUND_COLORS,
+  BORDER_COLORS,
+  TEXT_COLORS,
+} from "./constants/colors"
+
 import { ActiveRoom } from "./components/room/ActiveRoom"
 
 import type { AppConfig, ConnectionState } from "./types"
@@ -170,7 +176,7 @@ export default () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111111",
+    backgroundColor: BACKGROUND_COLORS.background,
   },
   connectContainer: {
     flex: 1,
@@ -182,7 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 8,
-    color: "#fff",
+    color: TEXT_COLORS.light,
   },
   inputContainer: {
     marginBottom: 20,
@@ -191,43 +197,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 8,
-    color: "#fff",
+    color: TEXT_COLORS.light,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: TEXT_COLORS.light,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: BORDER_COLORS.lightBorder,
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
-    color: "#333",
+    color: TEXT_COLORS.secondary,
     minHeight: 50,
   },
   errorContainer: {
-    backgroundColor: "#ffebee",
+    backgroundColor: BACKGROUND_COLORS.tertiary,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: "#f44336",
+    borderLeftColor: BORDER_COLORS.danger,
   },
   errorText: {
-    color: "#c62828",
+    color: TEXT_COLORS.danger,
     fontSize: 14,
     fontWeight: "500",
   },
   connectButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: BACKGROUND_COLORS.primary,
     borderRadius: 8,
     padding: 16,
     alignItems: "center",
     marginTop: 20,
   },
   connectButtonDisabled: {
-    backgroundColor: "#cccccc",
+    backgroundColor: BACKGROUND_COLORS.disabled,
   },
   connectButtonText: {
-    color: "#fff",
+    color: TEXT_COLORS.light,
     fontSize: 18,
     fontWeight: "600",
   },

@@ -3,6 +3,8 @@ import { Dimensions, StyleSheet, Text, View } from "react-native"
 import { VideoTrack, useTracks } from "@livekit/react-native"
 import { Track } from "livekit-client"
 
+import { BACKGROUND_COLORS, TEXT_COLORS } from "../../constants/colors"
+
 const { width, height } = Dimensions.get("window")
 
 const tracksOption: Track.Source[] = [
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   noVideoText: {
-    color: "#fff",
+    color: TEXT_COLORS.light,
     fontSize: 16,
   },
   participantsContainer: {
@@ -65,7 +67,7 @@ const styles = StyleSheet.create({
     width: width / 2 - 15,
     height: height / 3,
     margin: 5,
-    backgroundColor: "#333",
+    backgroundColor: BACKGROUND_COLORS.secondary,
     borderRadius: 8,
     overflow: "hidden",
   },
@@ -76,10 +78,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 10,
     left: 10,
-    color: "#fff",
+    color: TEXT_COLORS.light,
     fontSize: 14,
     fontWeight: "600",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: BACKGROUND_COLORS.tertiary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
