@@ -1,13 +1,14 @@
-import { useState, useCallback, useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
+
 import {
+  Alert,
+  LogBox,
+  SafeAreaView,
   StyleSheet,
   Text,
-  View,
   TextInput,
   TouchableOpacity,
-  Alert,
-  SafeAreaView,
-  LogBox,
+  View,
 } from "react-native"
 
 import { StatusBar } from "expo-status-bar"
@@ -15,7 +16,6 @@ import { StatusBar } from "expo-status-bar"
 import { LiveKitRoom } from "@livekit/react-native"
 
 import { ActiveRoom } from "./components/room/ActiveRoom"
-
 import type { AppConfig, ConnectionState } from "./types"
 
 const initialConfig: AppConfig = {
@@ -32,7 +32,7 @@ const initialConnectionState: ConnectionState = {
 export default () => {
   const [config, setConfig] = useState<AppConfig>(() => initialConfig)
   const [connectionState, setConnectionState] = useState<ConnectionState>(
-    () => initialConnectionState
+    () => initialConnectionState,
   )
 
   // Подавляем некритичные предупреждения
@@ -44,11 +44,11 @@ export default () => {
   }, [])
 
   const updateUrl = useCallback((url: string): void => {
-    setConfig((prev) => ({ ...prev, url }))
+    setConfig(prev => ({ ...prev, url }))
   }, [])
 
   const updateToken = useCallback((token: string): void => {
-    setConfig((prev) => ({ ...prev, token }))
+    setConfig(prev => ({ ...prev, token }))
   }, [])
 
   const connect = useCallback((): void => {
@@ -69,23 +69,23 @@ export default () => {
       return
     }
 
-    setConnectionState((prev) => ({ ...prev, connected: true }))
+    setConnectionState(prev => ({ ...prev, connected: true }))
   }, [config])
 
   const onDisconnect = useCallback((): void => {
-    setConnectionState((prev) => ({ ...prev, connected: false }))
+    setConnectionState(prev => ({ ...prev, connected: false }))
   }, [])
 
   const onConnectionError = useCallback((error?: Error): void => {
     console.error("Connection error: ", error)
-    setConnectionState((prev) => ({
+    setConnectionState(prev => ({
       ...prev,
       connected: false,
       error: error?.message || "Connection failed",
     }))
     Alert.alert(
       "Connection Error",
-      error?.message || "Failed to connect to the room"
+      error?.message || "Failed to connect to the room",
     )
   }, [])
 

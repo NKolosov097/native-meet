@@ -1,6 +1,6 @@
 import { useCallback, useContext, useState } from "react"
 
-import { Alert, View, TouchableOpacity, Text, StyleSheet } from "react-native"
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 import { RoomContext } from "@livekit/react-native"
 
@@ -15,7 +15,7 @@ const initialVideoControlsState: VideoControlsState = {
 export const ControlBar = () => {
   const room = useContext(RoomContext)
   const [controlsState, setControlsState] = useState<VideoControlsState>(
-    () => initialVideoControlsState
+    () => initialVideoControlsState,
   )
 
   const toggleMute = useCallback(async (): Promise<void> => {
@@ -23,7 +23,7 @@ export const ControlBar = () => {
 
     try {
       await room.localParticipant.setMicrophoneEnabled(!controlsState.isMuted)
-      setControlsState((prev) => ({ ...prev, isMuted: !prev.isMuted }))
+      setControlsState(prev => ({ ...prev, isMuted: !prev.isMuted }))
     } catch (error) {
       console.error("Error toggling microphone: ", error)
       Alert.alert("Error", "Failed to toggle microphone")
@@ -35,9 +35,9 @@ export const ControlBar = () => {
 
     try {
       await room.localParticipant.setCameraEnabled(
-        !controlsState.isVideoEnabled
+        !controlsState.isVideoEnabled,
       )
-      setControlsState((prev) => ({
+      setControlsState(prev => ({
         ...prev,
         isVideoEnabled: !prev.isVideoEnabled,
       }))

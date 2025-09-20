@@ -2,8 +2,8 @@ import { SafeAreaView, StyleSheet } from "react-native"
 
 import { StatusBar } from "expo-status-bar"
 
-import { VideoConference } from "./VideoConference"
 import { ControlBar } from "./ControlBar"
+import { VideoConference } from "./VideoConference"
 
 export const ActiveRoom = () => {
   return (

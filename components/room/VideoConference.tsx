@@ -1,7 +1,7 @@
-import { useTracks } from "@livekit/react-native"
-import { View, Text, StyleSheet, Dimensions } from "react-native"
+import { Dimensions, StyleSheet, Text, View } from "react-native"
+
+import { VideoTrack, useTracks } from "@livekit/react-native"
 import { Track } from "livekit-client"
-import { VideoTrack } from "@livekit/react-native"
 
 const { width, height } = Dimensions.get("window")
 
@@ -24,7 +24,7 @@ export const VideoConference = () => {
 
   return (
     <View style={styles.participantsContainer}>
-      {tracks.map((track) => (
+      {tracks.map(track => (
         <View
           key={track.publication.trackSid}
           style={styles.participantContainer}
