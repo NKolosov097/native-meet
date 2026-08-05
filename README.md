@@ -1,228 +1,228 @@
 # Native Meet - LiveKit React Native Demo
 
-Приложение для видеозвонков, построенное с использованием LiveKit React Native SDK, Expo и TypeScript.
+A video calling app built with the LiveKit React Native SDK, Expo and TypeScript.
 
-## Особенности
+## Features
 
-- 🎥 Видеозвонки в реальном времени
-- 🎙️ Аудио чат
-- 📱 Кроссплатформенность (iOS/Android)
-- 🔧 Простая настройка с Expo
-- 🎛️ Управление камерой и микрофоном
-- 📝 Полная типизация TypeScript
-- ♿ Поддержка accessibility
-- 🛡️ Обработка ошибок и валидация
+- 🎥 Real-time video calls
+- 🎙️ Audio chat
+- 📱 Cross-platform (iOS/Android)
+- 🔧 Simple setup with Expo
+- 🎛️ Camera and microphone controls
+- 📝 Full TypeScript typing
+- ♿ Accessibility support
+- 🛡️ Error handling and validation
 
-## Установка и настройка
+## Installation and setup
 
-### 1. Установите зависимости
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Настройте LiveKit сервер
+### 2. Set up a LiveKit server
 
-Для работы приложения вам понадобится LiveKit сервер. Вы можете:
+You need a LiveKit server to run the app. You can either:
 
-- Использовать [LiveKit Cloud](https://cloud.livekit.io/)
-- Запустить [локальный сервер LiveKit](https://docs.livekit.io/realtime/self-hosting/deployment/)
+- Use [LiveKit Cloud](https://cloud.livekit.io/)
+- Run a [self-hosted LiveKit server](https://docs.livekit.io/realtime/self-hosting/deployment/)
 
-### 3. Получите токен доступа
+### 3. Get an access token
 
-Для подключения к комнате вам нужен JWT токен. Вы можете:
+You need a JWT token to join a room. You can:
 
-- Сгенерировать токен через [LiveKit CLI](https://docs.livekit.io/realtime/server/generating-tokens/)
-- Использовать веб-интерфейс LiveKit Cloud
-- Создать токен программно на вашем сервере
+- Generate a token with the [LiveKit CLI](https://docs.livekit.io/realtime/server/generating-tokens/)
+- Use the LiveKit Cloud web interface
+- Create a token programmatically on your own server
 
-### 4. Запуск приложения
+### 4. Run the app
 
-⚠️ **Важно**: Это приложение использует нативные модули LiveKit и требует Expo Development Build, а не Expo Go.
+⚠️ **Important**: this app uses LiveKit native modules and requires an Expo Development Build, not Expo Go.
 
 ```bash
-# Первоначальная настройка (создание нативных папок)
+# Initial setup (generates the native folders)
 npx expo prebuild --clean
 
-# Для разработки с Development Client
+# Development with the Development Client
 npx expo start --dev-client
 
-# Для симулятора iOS (только на macOS)
+# iOS simulator (macOS only)
 npx expo run:ios
 
-# Для эмулятора Android
+# Android emulator
 npx expo run:android
 
-# Для веб-версии (ограниченная функциональность)
+# Web version (limited functionality)
 npx expo start --web
 
-# Облачная сборка для iOS (с помощью EAS)
+# Cloud build for iOS (via EAS)
 eas build --platform ios --profile development
 ```
 
-#### Первый запуск:
+#### First run:
 
-1. **Android**: `npx expo run:android` (автоматически установит Development Client)
-2. **iOS**: Требуется macOS или облачная сборка через EAS
-3. **Веб**: Работает, но без видео/аудио функций
+1. **Android**: `npx expo run:android` (installs the Development Client automatically)
+2. **iOS**: requires macOS or a cloud build via EAS
+3. **Web**: works, but without video/audio features
 
-## Использование
+## Usage
 
-1. Запустите приложение
-2. Введите URL вашего LiveKit сервера (например: `wss://your-server.livekit.cloud`)
-3. Введите действительный токен доступа
-4. Нажмите "Connect" для подключения к комнате
+1. Start the app
+2. Enter your LiveKit server URL (for example: `wss://your-server.livekit.cloud`)
+3. Enter a valid access token
+4. Press "Connect" to join the room
 
-## Конфигурация
+## Configuration
 
-### Разрешения
+### Permissions
 
-Приложение автоматически запрашивает следующие разрешения:
+The app automatically requests the following permissions:
 
 **iOS:**
 
-- `NSCameraUsageDescription` - доступ к камере
-- `NSMicrophoneUsageDescription` - доступ к микрофону
+- `NSCameraUsageDescription` - camera access
+- `NSMicrophoneUsageDescription` - microphone access
 
 **Android:**
 
-- `android.permission.CAMERA` - доступ к камере
-- `android.permission.RECORD_AUDIO` - доступ к микрофону
-- `android.permission.MODIFY_AUDIO_SETTINGS` - изменение настроек аудио
-- `android.permission.INTERNET` - доступ к интернету
-- `android.permission.ACCESS_NETWORK_STATE` - проверка состояния сети
-- `android.permission.WAKE_LOCK` - предотвращение блокировки экрана
+- `android.permission.CAMERA` - camera access
+- `android.permission.RECORD_AUDIO` - microphone access
+- `android.permission.MODIFY_AUDIO_SETTINGS` - change audio settings
+- `android.permission.INTERNET` - internet access
+- `android.permission.ACCESS_NETWORK_STATE` - check network state
+- `android.permission.WAKE_LOCK` - prevent the screen from locking
 
-### Плагины Expo
+### Expo plugins
 
-Проект настроен с использованием:
+The project is configured with:
 
-- `@livekit/react-native-expo-plugin` - основной плагин LiveKit для Expo
+- `@livekit/react-native-expo-plugin` - the main LiveKit plugin for Expo
 
-## Структура проекта
+## Project structure
 
 ```
 native-meet/
-├── App.tsx              # Главный компонент приложения (TypeScript)
-├── types/               # Типы TypeScript
-│   └── index.ts         # Основные интерфейсы и типы
-├── app.json             # Конфигурация Expo
-├── tsconfig.json        # Конфигурация TypeScript
-├── expo-env.d.ts        # Типы для Expo
-├── package.json         # Зависимости проекта
-├── assets/              # Ресурсы приложения
+├── App.tsx              # Main app component (TypeScript)
+├── types/               # TypeScript types
+│   └── index.ts         # Core interfaces and types
+├── app.json             # Expo configuration
+├── tsconfig.json        # TypeScript configuration
+├── expo-env.d.ts        # Expo type definitions
+├── package.json         # Project dependencies
+├── assets/              # App assets
 │   ├── icon.png
 │   ├── splash-icon.png
 │   └── ...
-└── README.md           # Документация
+└── README.md           # Documentation
 ```
 
 ## TypeScript
 
-Проект полностью типизирован с использованием TypeScript:
+The project is fully typed with TypeScript:
 
-- **Строгая типизация** - все компоненты и функции имеют явные типы
-- **Интерфейсы** - определены в `types/index.ts` для всех основных структур данных
-- **Type Safety** - предотвращение ошибок времени выполнения
-- **IntelliSense** - улучшенная поддержка в IDE
+- **Strict typing** - all components and functions have explicit types
+- **Interfaces** - defined in `types/index.ts` for all core data structures
+- **Type safety** - prevents runtime errors
+- **IntelliSense** - improved IDE support
 
-### Основные типы:
+### Core types:
 
-- `AppConfig` - конфигурация подключения
-- `ConnectionState` - состояние соединения
-- `VideoControlsState` - состояние элементов управления
-- `ParticipantInfo` - информация об участниках
+- `AppConfig` - connection configuration
+- `ConnectionState` - connection state
+- `VideoControlsState` - controls state
+- `ParticipantInfo` - participant information
 
-## Возможности приложения
+## App capabilities
 
-### Экран подключения
+### Connection screen
 
-- Ввод URL сервера LiveKit
-- Ввод токена доступа
-- Валидация данных перед подключением
+- LiveKit server URL input
+- Access token input
+- Input validation before connecting
 
-### Экран видеозвонка
+### Video call screen
 
-- Отображение видео всех участников
-- Управление микрофоном (включение/выключение)
-- Управление камерой (включение/выключение)
-- Отображение количества участников
-- Кнопка отключения от комнаты
+- Video display for all participants
+- Microphone control (mute/unmute)
+- Camera control (on/off)
+- Participant count display
+- Disconnect from room button
 
-## Разработка
+## Development
 
-### Требования
+### Requirements
 
 - Node.js 16+
 - Expo CLI
 - EAS CLI: `npm install -g eas-cli`
-- iOS Simulator (для iOS разработки, только macOS)
-- Android Emulator или устройство (для Android разработки)
-- Android Studio (для Android разработки)
-- Xcode (для iOS разработки, только macOS)
+- iOS Simulator (for iOS development, macOS only)
+- Android emulator or device (for Android development)
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
 
-### Отладка
+### Debugging
 
 ```bash
-# Показать логи
+# Show logs
 npx expo logs
 
-# Очистить кэш
+# Clear the cache
 npx expo start -c
 
-# Проверить типы TypeScript
+# Check TypeScript types
 npx tsc --noEmit
 
-# Проверить типы в режиме наблюдения
+# Check types in watch mode
 npx tsc --noEmit --watch
 ```
 
-## Полезные ссылки
+## Useful links
 
 - [LiveKit Documentation](https://docs.livekit.io/)
 - [LiveKit React Native SDK](https://docs.livekit.io/client-sdk-js/react-native/)
 - [Expo Documentation](https://docs.expo.dev/)
 - [LiveKit Cloud](https://cloud.livekit.io/)
 
-## Устранение неполадок
+## Troubleshooting
 
-### Ошибка "The package '@livekit/react-native' doesn't seem to be linked"
+### Error "The package '@livekit/react-native' doesn't seem to be linked"
 
-Эта ошибка возникает при попытке использовать Expo Go вместо Development Build:
+This error happens when you try to use Expo Go instead of a Development Build:
 
-1. **Для Android**:
+1. **On Android**:
 
    ```bash
    npx expo run:android
    ```
 
-2. **Для iOS (только macOS)**:
+2. **On iOS (macOS only)**:
 
    ```bash
    npx expo run:ios
    ```
 
-3. **Для iOS на Windows/Linux**:
+3. **For iOS on Windows/Linux**:
    ```bash
    eas build --platform ios --profile development
    ```
 
-### Другие проблемы
+### Other issues
 
-- **Проблемы с нативными модулями**: Выполните `npx expo prebuild --clean`
-- **Кэш проблемы**: Используйте `npx expo start -c --dev-client`
-- **Metro bundler ошибки**: Перезапустите сервер разработки
+- **Native module problems**: run `npx expo prebuild --clean`
+- **Cache problems**: use `npx expo start -c --dev-client`
+- **Metro bundler errors**: restart the development server
 
-## Поддержка
+## Support
 
-Если у вас возникли проблемы:
+If you run into problems:
 
-1. Проверьте, что вы используете Development Build, а не Expo Go
-2. Убедитесь, что все зависимости установлены корректно
-3. Проверьте, что ваш LiveKit сервер доступен
-4. Проверьте правильность токена доступа
-5. Обратитесь к документации LiveKit
+1. Verify you are using a Development Build, not Expo Go
+2. Make sure all dependencies are installed correctly
+3. Check that your LiveKit server is reachable
+4. Check that the access token is valid
+5. Consult the LiveKit documentation
 
-## Лицензия
+## License
 
 MIT License
