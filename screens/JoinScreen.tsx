@@ -20,7 +20,6 @@ import { configError } from "@/constants/env"
 import { fetchParticipantToken } from "@/services/livekitToken"
 
 interface JoinScreenProps {
-  // Error from a previous room connection attempt, shown on return
   error?: string
   onJoined: (token: string) => void
 }
@@ -31,9 +30,6 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [hasStartedJoin, setHasStartedJoin] = useState<boolean>(false)
-  // Guards against onPress and onSubmitEditing both firing in the same tick,
-  // which would otherwise start two concurrent token requests: isLoading
-  // only flips after the first setIsLoading call is processed.
   const isJoiningRef = useRef<boolean>(false)
 
   const join = useCallback(async (): Promise<void> => {

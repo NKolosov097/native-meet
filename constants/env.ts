@@ -1,7 +1,3 @@
-// Environment configuration for the LiveKit connection.
-// Expo inlines EXPO_PUBLIC_* variables at build time, so each one has to be
-// referenced by its literal name — a computed lookup resolves to undefined.
-
 export interface Env {
   serverUrl: string
   sandboxId: string
@@ -24,7 +20,6 @@ const missingNames = (Object.keys(VARIABLE_NAMES) as (keyof Env)[])
   .filter(key => !rawEnv[key]?.trim())
   .map(key => VARIABLE_NAMES[key])
 
-// Message naming the variables that still need a value, or null when ready
 export const configError: string | null =
   missingNames.length > 0
     ? `Missing environment variables: ${missingNames.join(", ")}`
