@@ -34,14 +34,14 @@ const initialConnectionState: ConnectionState = {
   connecting: false,
 }
 
-// Главный компонент приложения
+// Main application component
 export default () => {
   const [config, setConfig] = useState<AppConfig>(() => initialConfig)
   const [connectionState, setConnectionState] = useState<ConnectionState>(
     () => initialConnectionState,
   )
 
-  // Подавляем некритичные предупреждения
+  // Suppress non-critical warnings
   useEffect(() => {
     LogBox.ignoreLogs([
       "An event listener wasn't added because it has been added already",
@@ -63,7 +63,7 @@ export default () => {
       return
     }
 
-    // Базовая валидация URL
+    // Basic URL validation
     try {
       const urlObj = new URL(config.url)
       if (!["ws:", "wss:"].includes(urlObj.protocol)) {

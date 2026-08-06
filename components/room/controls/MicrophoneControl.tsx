@@ -38,12 +38,12 @@ export const MicrophoneControl = ({
   const [selectedInputDevice, setSelectedInputDevice] = useState<string>("")
   const [selectedOutputDevice, setSelectedOutputDevice] = useState<string>("")
 
-  // Закрываем выпадающий список при клике вне области
+  // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
     setIsDropdownVisible(false)
   }, [])
 
-  // Получаем список аудио устройств
+  // Get the list of audio devices
   const loadAudioDevices = useCallback(async () => {
     try {
       if (navigator?.mediaDevices?.enumerateDevices) {
@@ -78,11 +78,11 @@ export const MicrophoneControl = ({
         if (!room) return
 
         if (kind === "audioinput") {
-          // Переключаем микрофон
+          // Switch the microphone
           await room.switchActiveDevice("audioinput", deviceId)
           setSelectedInputDevice(deviceId)
         } else {
-          // Переключаем динамики
+          // Switch the speakers
           await room.switchActiveDevice("audiooutput", deviceId)
           setSelectedOutputDevice(deviceId)
         }
@@ -107,7 +107,7 @@ export const MicrophoneControl = ({
   return (
     <>
       <View style={styles.container}>
-        {/* Кнопка микрофона */}
+        {/* Microphone button */}
         <TouchableOpacity
           style={[styles.micButton, isMuted && styles.micButtonMuted]}
           onPress={onToggleMute}
@@ -118,7 +118,7 @@ export const MicrophoneControl = ({
           <Text style={styles.micIcon}>🎤</Text>
         </TouchableOpacity>
 
-        {/* Кнопка выпадающего списка */}
+        {/* Dropdown list button */}
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => setIsDropdownVisible(!isDropdownVisible)}
@@ -134,13 +134,13 @@ export const MicrophoneControl = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Выпадающий список устройств */}
+        {/* Device dropdown list */}
         {isDropdownVisible && (
           <View style={styles.dropdownContainer}>
             <ScrollView style={styles.deviceList}>
               {hasInputAndOutput ? (
                 <>
-                  {/* Секция устройств вывода */}
+                  {/* Output devices section */}
                   <Text style={styles.sectionTitle}>Выберите динамики</Text>
                   {outputDevices.map(device => (
                     <TouchableOpacity
@@ -161,7 +161,7 @@ export const MicrophoneControl = ({
                     </TouchableOpacity>
                   ))}
 
-                  {/* Секция устройств ввода */}
+                  {/* Input devices section */}
                   <Text
                     style={[styles.sectionTitle, styles.sectionTitleSecond]}
                   >
@@ -188,7 +188,7 @@ export const MicrophoneControl = ({
                 </>
               ) : (
                 <>
-                  {/* Общий список всех аудио устройств */}
+                  {/* Combined list of all audio devices */}
                   <Text style={styles.sectionTitle}>Выберите микрофон</Text>
                   {audioDevices.map(device => (
                     <TouchableOpacity
@@ -230,7 +230,7 @@ export const MicrophoneControl = ({
         )}
       </View>
 
-      {/* Overlay для закрытия списка при клике вне области */}
+      {/* Overlay to close the list on a click outside its area */}
       {isDropdownVisible && (
         <Pressable
           style={styles.overlay}

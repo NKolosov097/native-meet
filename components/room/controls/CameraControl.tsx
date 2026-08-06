@@ -37,12 +37,12 @@ export const CameraControl = ({
   const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([])
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>("")
 
-  // Закрываем выпадающий список при клике вне области
+  // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
     setIsDropdownVisible(false)
   }, [])
 
-  // Получаем список видео устройств
+  // Get the list of video devices
   const loadVideoDevices = useCallback(async () => {
     try {
       if (navigator?.mediaDevices?.enumerateDevices) {
@@ -71,7 +71,7 @@ export const CameraControl = ({
       try {
         if (!room) return
 
-        // Переключаем камеру
+        // Switch the camera
         await room.switchActiveDevice("videoinput", deviceId)
         setSelectedVideoDevice(deviceId)
         setIsDropdownVisible(false)
@@ -86,7 +86,7 @@ export const CameraControl = ({
   return (
     <>
       <View style={styles.container}>
-        {/* Кнопка камеры */}
+        {/* Camera button */}
         <TouchableOpacity
           style={[
             styles.cameraButton,
@@ -100,7 +100,7 @@ export const CameraControl = ({
           <Text style={styles.cameraIcon}>📹</Text>
         </TouchableOpacity>
 
-        {/* Кнопка выпадающего списка */}
+        {/* Dropdown list button */}
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => setIsDropdownVisible(!isDropdownVisible)}
@@ -116,7 +116,7 @@ export const CameraControl = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Выпадающий список камер */}
+        {/* Camera dropdown list */}
         {isDropdownVisible && (
           <View style={styles.dropdownContainer}>
             <ScrollView style={styles.deviceList}>
@@ -147,7 +147,7 @@ export const CameraControl = ({
         )}
       </View>
 
-      {/* Overlay для закрытия списка при клике вне области */}
+      {/* Overlay to close the list on a click outside its area */}
       {isDropdownVisible && (
         <Pressable
           style={styles.overlay}

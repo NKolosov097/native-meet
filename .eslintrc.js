@@ -26,9 +26,9 @@ module.exports = {
       "error",
       {
         groups: [
-          "builtin", // Node.js встроенные модули
-          "external", // npm пакеты
-          "internal", // внутренние модули
+          "builtin", // Node.js built-in modules
+          "external", // npm packages
+          "internal", // internal modules
           "parent", // ../
           "sibling", // ./
           "index", // ./index

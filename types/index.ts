@@ -1,4 +1,4 @@
-// Типы для LiveKit React Native приложения
+// Types for the LiveKit React Native application
 
 export interface AppConfig {
   url: string

@@ -64,22 +64,22 @@ export const ControlBar = () => {
 
   return (
     <View style={styles.controlsContainer}>
-      {/* Компонент управления микрофоном с выпадающим списком */}
+      {/* Microphone control component with a dropdown list */}
       <MicrophoneControl
         isMuted={controlsState.isMuted}
         onToggleMute={toggleMute}
       />
 
-      {/* Компонент управления камерой с выпадающим списком */}
+      {/* Camera control component with a dropdown list */}
       <CameraControl
         isVideoEnabled={controlsState.isVideoEnabled}
         onToggleVideo={toggleVideo}
       />
 
-      {/* Компонент управления режимом экрана */}
+      {/* Screen mode control component */}
       <ScreenModeControl />
 
-      {/* Кнопка отключения */}
+      {/* Disconnect button */}
       <TouchableOpacity
         style={[styles.controlButton, styles.disconnectButton]}
         onPress={disconnect}
