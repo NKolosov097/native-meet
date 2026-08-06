@@ -4,6 +4,7 @@ export const BACKGROUND_COLORS = {
   tertiary: "rgba(0, 0, 0, 0.8)",
   background: "#111111",
   lightBackground: "#1e1e1e",
+  black: "#000000",
   primary: "#007AFF",
   disabled: "#cccccc",
   transparent: "transparent",

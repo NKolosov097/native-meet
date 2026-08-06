@@ -2,6 +2,8 @@ import { SafeAreaView, StyleSheet } from "react-native"
 
 import { StatusBar } from "expo-status-bar"
 
+import { BACKGROUND_COLORS } from "@/constants/colors"
+
 import { ControlBar } from "./ControlBar"
 import { VideoConference } from "./VideoConference"
 
@@ -18,6 +20,6 @@ export const ActiveRoom = () => {
 const styles = StyleSheet.create({
   roomContainer: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: BACKGROUND_COLORS.black,
   },
 })

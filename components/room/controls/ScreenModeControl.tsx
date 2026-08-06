@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
 
-import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
+import { BACKGROUND_COLORS } from "@/constants/colors"
 
 interface ScreenModeControlProps {
   onToggleFullscreen?: () => void
