@@ -2,6 +2,11 @@ import { useCallback, useEffect, useState } from "react"
 import { LogBox } from "react-native"
 
 import { LiveKitRoom } from "@livekit/react-native"
+import {
+  VideoPresets,
+  type RoomConnectOptions,
+  type RoomOptions,
+} from "livekit-client"
 
 import { ActiveRoom } from "@/components/room/ActiveRoom"
 import { env } from "@/constants/env"
@@ -11,6 +16,22 @@ import type { ConnectionState } from "@/types"
 
 const initialConnectionState: ConnectionState = {
   token: null,
+}
+
+const roomOptions: RoomOptions = {
+  adaptiveStream: true,
+  dynacast: true,
+  videoCaptureDefaults: {
+    resolution: VideoPresets.h360.resolution,
+  },
+  publishDefaults: {
+    simulcast: false,
+    videoEncoding: VideoPresets.h360.encoding,
+  },
+}
+
+const connectOptions: RoomConnectOptions = {
+  maxRetries: 5,
 }
 
 // Main application component
@@ -54,7 +75,8 @@ export default () => {
       connect
       onDisconnected={onDisconnect}
       onError={onConnectionError}
-      options={{}}
+      options={roomOptions}
+      connectOptions={connectOptions}
     >
       <ActiveRoom />
     </LiveKitRoom>
