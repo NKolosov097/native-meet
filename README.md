@@ -21,20 +21,35 @@ A video calling app built with the LiveKit React Native SDK, Expo and TypeScript
 npm install
 ```
 
-### 2. Set up a LiveKit server
+### 2. Set up a LiveKit Cloud project
 
-You need a LiveKit server to run the app. You can either:
+The app connects to [LiveKit Cloud](https://cloud.livekit.io/) and gets access
+tokens from the project's token server, so no backend of your own is needed.
 
-- Use [LiveKit Cloud](https://cloud.livekit.io/)
-- Run a [self-hosted LiveKit server](https://docs.livekit.io/realtime/self-hosting/deployment/)
+In the project settings you need two values:
 
-### 3. Get an access token
+- **Project URL** — the `wss://` address of the project
+- **Token server ID** — enable "Token server" in the project settings and copy the ID
 
-You need a JWT token to join a room. You can:
+> The token server issues a token to anyone who asks, with any permissions. It
+> is meant for local development and testing, not for production.
 
-- Generate a token with the [LiveKit CLI](https://docs.livekit.io/realtime/server/generating-tokens/)
-- Use the LiveKit Cloud web interface
-- Create a token programmatically on your own server
+### 3. Configure the environment
+
+Copy `.env.example` to `.env.local` and fill in the values:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable                         | Meaning                                                   |
+| -------------------------------- | --------------------------------------------------------- |
+| `EXPO_PUBLIC_LIVEKIT_URL`        | Project URL, for example `wss://my-project.livekit.cloud` |
+| `EXPO_PUBLIC_LIVEKIT_SANDBOX_ID` | Token server ID                                           |
+| `EXPO_PUBLIC_LIVEKIT_ROOM`       | Name of the room every participant joins                  |
+
+`.env.local` is git-ignored. If a variable is missing, the login screen says
+which one and the "Join" button stays disabled.
 
 ### 4. Run the app
 
@@ -69,9 +84,12 @@ eas build --platform ios --profile development
 ## Usage
 
 1. Start the app
-2. Enter your LiveKit server URL (for example: `wss://your-server.livekit.cloud`)
-3. Enter a valid access token
-4. Press "Connect" to join the room
+2. Enter your name
+3. Press "Join" — the app requests an access token and joins the room from
+   `EXPO_PUBLIC_LIVEKIT_ROOM`
+
+Participants with the same name do not clash: the display name is what you
+typed, while the LiveKit identity gets a random suffix.
 
 ## Configuration
 
@@ -104,17 +122,26 @@ The project is configured with:
 ```
 native-meet/
 ├── App.tsx              # Main app component (TypeScript)
+├── screens/             # App screens
+│   └── JoinScreen.tsx   # Login screen with the participant name input
+├── components/          # UI components
+│   └── room/            # Video call screen and its controls
+├── services/            # External services
+│   └── livekitToken.ts  # Access token fetching from the token server
+├── constants/           # Colors and environment configuration
+│   ├── colors.ts
+│   └── env.ts
 ├── types/               # TypeScript types
 │   └── index.ts         # Core interfaces and types
+├── .env.example         # Template for .env.local
 ├── app.json             # Expo configuration
 ├── tsconfig.json        # TypeScript configuration
-├── expo-env.d.ts        # Expo type definitions
 ├── package.json         # Project dependencies
 ├── assets/              # App assets
 │   ├── icon.png
 │   ├── splash-icon.png
 │   └── ...
-└── README.md           # Documentation
+└── README.md            # Documentation
 ```
 
 ## TypeScript
@@ -128,18 +155,16 @@ The project is fully typed with TypeScript:
 
 ### Core types:
 
-- `AppConfig` - connection configuration
-- `ConnectionState` - connection state
+- `ConnectionState` - session state: access token and last error
 - `VideoControlsState` - controls state
-- `ParticipantInfo` - participant information
 
 ## App capabilities
 
-### Connection screen
+### Login screen
 
-- LiveKit server URL input
-- Access token input
-- Input validation before connecting
+- Participant name input
+- Access token requested from the LiveKit Cloud token server
+- Environment configuration and connection errors shown inline
 
 ### Video call screen
 
@@ -219,8 +244,8 @@ If you run into problems:
 
 1. Verify you are using a Development Build, not Expo Go
 2. Make sure all dependencies are installed correctly
-3. Check that your LiveKit server is reachable
-4. Check that the access token is valid
+3. Check that `.env.local` exists and all three variables are filled in
+4. Check that the token server is enabled in the LiveKit Cloud project settings
 5. Consult the LiveKit documentation
 
 ## License
