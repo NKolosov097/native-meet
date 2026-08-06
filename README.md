@@ -160,7 +160,6 @@ The project is fully typed with TypeScript:
 ### Core types:
 
 - `ConnectionState` - session state: access token and last error
-- `VideoControlsState` - controls state
 
 ## App capabilities
 

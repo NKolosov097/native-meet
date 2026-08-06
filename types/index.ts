@@ -5,9 +5,3 @@ export interface ConnectionState {
   token: string | null
   error?: string
 }
-
-export interface VideoControlsState {
-  isMuted: boolean
-  isVideoEnabled: boolean
-  isSpeaking: boolean
-}

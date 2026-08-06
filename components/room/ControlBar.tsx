@@ -1,7 +1,7 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef } from "react"
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
-import { useRoomContext } from "@livekit/react-native"
+import { useLocalParticipant, useRoomContext } from "@livekit/react-native"
 
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
@@ -9,48 +9,42 @@ import { CameraControl } from "./controls/CameraControl"
 import { MicrophoneControl } from "./controls/MicrophoneControl"
 import { ScreenModeControl } from "./controls/ScreenModeControl"
 
-import type { VideoControlsState } from "@/types"
-
-const initialVideoControlsState: VideoControlsState = {
-  isMuted: false,
-  isVideoEnabled: true,
-  isSpeaking: false,
-}
-
 export const ControlBar = () => {
   const room = useRoomContext()
-  const [controlsState, setControlsState] = useState<VideoControlsState>(
-    () => initialVideoControlsState,
-  )
+  const { localParticipant, isCameraEnabled, isMicrophoneEnabled } =
+    useLocalParticipant()
+  const isTogglingMicrophone = useRef<boolean>(false)
+  const isTogglingCamera = useRef<boolean>(false)
 
   const toggleMute = useCallback(async (): Promise<void> => {
-    if (!room) return
+    if (isTogglingMicrophone.current) return
+
+    isTogglingMicrophone.current = true
 
     try {
-      await room.localParticipant.setMicrophoneEnabled(!controlsState.isMuted)
-      setControlsState(prev => ({ ...prev, isMuted: !prev.isMuted }))
+      await localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
     } catch (error) {
       console.error("Error toggling microphone: ", error)
       Alert.alert("Error", "Failed to toggle microphone")
+    } finally {
+      isTogglingMicrophone.current = false
     }
-  }, [room, controlsState.isMuted])
+  }, [localParticipant, isMicrophoneEnabled])
 
   const toggleVideo = useCallback(async (): Promise<void> => {
-    if (!room) return
+    if (isTogglingCamera.current) return
+
+    isTogglingCamera.current = true
 
     try {
-      await room.localParticipant.setCameraEnabled(
-        !controlsState.isVideoEnabled,
-      )
-      setControlsState(prev => ({
-        ...prev,
-        isVideoEnabled: !prev.isVideoEnabled,
-      }))
+      await localParticipant.setCameraEnabled(!isCameraEnabled)
     } catch (error) {
       console.error("Error toggling camera: ", error)
       Alert.alert("Error", "Failed to toggle camera")
+    } finally {
+      isTogglingCamera.current = false
     }
-  }, [room, controlsState.isVideoEnabled])
+  }, [localParticipant, isCameraEnabled])
 
   const disconnect = useCallback(async (): Promise<void> => {
     if (!room) return
@@ -66,13 +60,13 @@ export const ControlBar = () => {
     <View style={styles.controlsContainer}>
       {/* Microphone control component with a dropdown list */}
       <MicrophoneControl
-        isMuted={controlsState.isMuted}
+        isMuted={!isMicrophoneEnabled}
         onToggleMute={toggleMute}
       />
 
       {/* Camera control component with a dropdown list */}
       <CameraControl
-        isVideoEnabled={controlsState.isVideoEnabled}
+        isVideoEnabled={isCameraEnabled}
         onToggleVideo={toggleVideo}
       />
 
