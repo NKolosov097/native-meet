@@ -1,42 +1,20 @@
 import { useCallback, useEffect, useState } from "react"
-import {
-  Alert,
-  LogBox,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native"
-
-import { StatusBar } from "expo-status-bar"
+import { LogBox } from "react-native"
 
 import { LiveKitRoom } from "@livekit/react-native"
 
-import {
-  BACKGROUND_COLORS,
-  BORDER_COLORS,
-  TEXT_COLORS,
-} from "./constants/colors"
+import { ActiveRoom } from "@/components/room/ActiveRoom"
+import { env } from "@/constants/env"
+import { JoinScreen } from "@/screens/JoinScreen"
 
-import { ActiveRoom } from "./components/room/ActiveRoom"
-
-import type { AppConfig, ConnectionState } from "./types"
-
-const initialConfig: AppConfig = {
-  url: "",
-  token: "",
-}
+import type { ConnectionState } from "@/types"
 
 const initialConnectionState: ConnectionState = {
-  connected: false,
-  connecting: false,
+  token: null,
 }
 
 // Main application component
 export default () => {
-  const [config, setConfig] = useState<AppConfig>(() => initialConfig)
   const [connectionState, setConnectionState] = useState<ConnectionState>(
     () => initialConnectionState,
   )
@@ -49,192 +27,36 @@ export default () => {
     ])
   }, [])
 
-  const updateUrl = useCallback((url: string): void => {
-    setConfig(prev => ({ ...prev, url }))
+  const onJoined = useCallback((token: string): void => {
+    setConnectionState({ token })
   }, [])
-
-  const updateToken = useCallback((token: string): void => {
-    setConfig(prev => ({ ...prev, token }))
-  }, [])
-
-  const connect = useCallback((): void => {
-    if (!config.url.trim() || !config.token.trim()) {
-      Alert.alert("Error", "Please enter both URL and token")
-      return
-    }
-
-    // Basic URL validation
-    try {
-      const urlObj = new URL(config.url)
-      if (!["ws:", "wss:"].includes(urlObj.protocol)) {
-        Alert.alert("Error", "URL must use ws:// or wss:// protocol")
-        return
-      }
-    } catch {
-      Alert.alert("Error", "Please enter a valid WebSocket URL")
-      return
-    }
-
-    setConnectionState(prev => ({ ...prev, connected: true }))
-  }, [config])
 
   const onDisconnect = useCallback((): void => {
-    setConnectionState(prev => ({ ...prev, connected: false }))
+    setConnectionState({ token: null })
   }, [])
 
   const onConnectionError = useCallback((error?: Error): void => {
     console.error("Connection error: ", error)
-    setConnectionState(prev => ({
-      ...prev,
-      connected: false,
-      error: error?.message || "Connection failed",
-    }))
-    Alert.alert(
-      "Connection Error",
-      error?.message || "Failed to connect to the room",
-    )
+    setConnectionState({
+      token: null,
+      error: error?.message || "Failed to connect to the room",
+    })
   }, [])
 
-  if (connectionState.connected) {
-    return (
-      <LiveKitRoom
-        serverUrl={config.url}
-        token={config.token}
-        connect
-        onDisconnected={onDisconnect}
-        onError={onConnectionError}
-        options={{}}
-      >
-        <ActiveRoom />
-      </LiveKitRoom>
-    )
+  if (connectionState.token === null) {
+    return <JoinScreen error={connectionState.error} onJoined={onJoined} />
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.connectContainer}>
-        <Text style={styles.title}>Native Meet</Text>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Server URL:</Text>
-          <TextInput
-            style={styles.input}
-            value={config.url}
-            onChangeText={updateUrl}
-            placeholder="wss://your-livekit-server.com"
-            placeholderTextColor="#999"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-            accessibilityLabel="LiveKit server URL"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Token:</Text>
-          <TextInput
-            style={styles.input}
-            value={config.token}
-            onChangeText={updateToken}
-            placeholder="Enter your access token"
-            placeholderTextColor="#999"
-            autoCapitalize="none"
-            autoCorrect={false}
-            multiline={true}
-            numberOfLines={3}
-            secureTextEntry={false}
-            accessibilityLabel="Access token"
-          />
-        </View>
-
-        {connectionState.error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{connectionState.error}</Text>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={[
-            styles.connectButton,
-            connectionState.connecting && styles.connectButtonDisabled,
-          ]}
-          onPress={connect}
-          disabled={connectionState.connecting}
-          accessibilityLabel="Connect to room"
-        >
-          <Text style={styles.connectButtonText}>
-            {connectionState.connecting ? "Connecting..." : "Connect"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <StatusBar style="auto" />
-    </SafeAreaView>
+    <LiveKitRoom
+      serverUrl={env.serverUrl}
+      token={connectionState.token}
+      connect
+      onDisconnected={onDisconnect}
+      onError={onConnectionError}
+      options={{}}
+    >
+      <ActiveRoom />
+    </LiveKitRoom>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BACKGROUND_COLORS.background,
-  },
-  connectContainer: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
-    color: TEXT_COLORS.light,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: TEXT_COLORS.light,
-  },
-  input: {
-    backgroundColor: TEXT_COLORS.light,
-    borderWidth: 1,
-    borderColor: BORDER_COLORS.lightBorder,
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    color: TEXT_COLORS.secondary,
-    minHeight: 50,
-  },
-  errorContainer: {
-    backgroundColor: BACKGROUND_COLORS.tertiary,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: BORDER_COLORS.danger,
-  },
-  errorText: {
-    color: TEXT_COLORS.danger,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  connectButton: {
-    backgroundColor: BACKGROUND_COLORS.primary,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  connectButtonDisabled: {
-    backgroundColor: BACKGROUND_COLORS.disabled,
-  },
-  connectButtonText: {
-    color: TEXT_COLORS.light,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-})
