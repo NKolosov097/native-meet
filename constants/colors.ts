@@ -3,8 +3,10 @@ export const BACKGROUND_COLORS = {
   secondary: "#333",
   tertiary: "rgba(0, 0, 0, 0.8)",
   background: "#111111",
+  lightBackground: "#1e1e1e",
   primary: "#007AFF",
   disabled: "#cccccc",
+  transparent: "transparent",
 }
 
 export const TEXT_COLORS = {
@@ -18,4 +20,8 @@ export const BORDER_COLORS = {
   secondary: "#ddd",
   lightBorder: "#ddd",
   danger: "#f44336",
+}
+
+export const SHADOW_COLORS = {
+  black: "#000000",
 }
