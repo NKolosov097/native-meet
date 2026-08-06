@@ -5,6 +5,10 @@ import { useRoomContext } from "@livekit/react-native"
 
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
+import { CameraControl } from "./controls/CameraControl"
+import { MicrophoneControl } from "./controls/MicrophoneControl"
+import { ScreenModeControl } from "./controls/ScreenModeControl"
+
 import type { VideoControlsState } from "@/types"
 
 const initialVideoControlsState: VideoControlsState = {
@@ -60,36 +64,22 @@ export const ControlBar = () => {
 
   return (
     <View style={styles.controlsContainer}>
-      <TouchableOpacity
-        style={[
-          styles.controlButton,
-          controlsState.isMuted && styles.controlButtonActive,
-        ]}
-        onPress={toggleMute}
-        accessibilityLabel={
-          controlsState.isMuted ? "Unmute microphone" : "Mute microphone"
-        }
-      >
-        <Text style={styles.controlButtonText}>
-          {controlsState.isMuted ? "Unmute" : "Mute"}
-        </Text>
-      </TouchableOpacity>
+      {/* Компонент управления микрофоном с выпадающим списком */}
+      <MicrophoneControl
+        isMuted={controlsState.isMuted}
+        onToggleMute={toggleMute}
+      />
 
-      <TouchableOpacity
-        style={[
-          styles.controlButton,
-          !controlsState.isVideoEnabled && styles.controlButtonActive,
-        ]}
-        onPress={toggleVideo}
-        accessibilityLabel={
-          controlsState.isVideoEnabled ? "Stop video" : "Start video"
-        }
-      >
-        <Text style={styles.controlButtonText}>
-          {controlsState.isVideoEnabled ? "Stop Video" : "Start Video"}
-        </Text>
-      </TouchableOpacity>
+      {/* Компонент управления камерой с выпадающим списком */}
+      <CameraControl
+        isVideoEnabled={controlsState.isVideoEnabled}
+        onToggleVideo={toggleVideo}
+      />
 
+      {/* Компонент управления режимом экрана */}
+      <ScreenModeControl />
+
+      {/* Кнопка отключения */}
       <TouchableOpacity
         style={[styles.controlButton, styles.disconnectButton]}
         onPress={disconnect}
@@ -104,9 +94,10 @@ export const ControlBar = () => {
 const styles = StyleSheet.create({
   controlsContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
     backgroundColor: BACKGROUND_COLORS.tertiary,
   },
   controlButton: {
@@ -116,9 +107,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     minWidth: 80,
     alignItems: "center",
-  },
-  controlButtonActive: {
-    backgroundColor: TEXT_COLORS.danger,
   },
   controlButtonText: {
     color: TEXT_COLORS.light,
