@@ -26,29 +26,31 @@
 
 ## File Structure
 
-| File | Responsibility |
-|---|---|
-| `constants/env.ts` | **Create.** Reads `EXPO_PUBLIC_*`, exports `env` and `configError`. The only place touching `process.env`. |
-| `.env.example` | **Create.** Committed template listing the three required variables. |
-| `.env.local` | **Modify (never commit).** Adds sandbox ID and room name, drops three dead keys. |
+| File                       | Responsibility                                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `constants/env.ts`         | **Create.** Reads `EXPO_PUBLIC_*`, exports `env` and `configError`. The only place touching `process.env`.                       |
+| `.env.example`             | **Create.** Committed template listing the three required variables.                                                             |
+| `.env.local`               | **Modify (never commit).** Adds sandbox ID and room name, drops three dead keys.                                                 |
 | `services/livekitToken.ts` | **Create.** Wraps `TokenSource.sandboxTokenServer`, exports `fetchParticipantToken`. The only place knowing about LiveKit Cloud. |
-| `package.json` | **Modify.** Adds `livekit-client` `2.21.0` as an explicit dependency. |
-| `constants/colors.ts` | **Modify.** Adds the placeholder text color. |
-| `screens/JoinScreen.tsx` | **Create.** Name input, join button, loading and error display. Owns the login screen styles. |
-| `types/index.ts` | **Modify.** Removes `AppConfig`, reshapes `ConnectionState`. |
-| `App.tsx` | **Modify.** Shrinks to state + branch between `JoinScreen` and `LiveKitRoom`. |
-| `README.md` | **Modify.** Documents the new setup and usage. |
+| `package.json`             | **Modify.** Adds `livekit-client` `2.21.0` as an explicit dependency.                                                            |
+| `constants/colors.ts`      | **Modify.** Adds the placeholder text color.                                                                                     |
+| `screens/JoinScreen.tsx`   | **Create.** Name input, join button, loading and error display. Owns the login screen styles.                                    |
+| `types/index.ts`           | **Modify.** Removes `AppConfig`, reshapes `ConnectionState`.                                                                     |
+| `App.tsx`                  | **Modify.** Shrinks to state + branch between `JoinScreen` and `LiveKitRoom`.                                                    |
+| `README.md`                | **Modify.** Documents the new setup and usage.                                                                                   |
 
 ---
 
 ### Task 1: Environment configuration
 
 **Files:**
+
 - Create: `constants/env.ts`
 - Create: `.env.example`
 - Modify: `.env.local` (git-ignored — edit but never commit)
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces:
   - `env: { serverUrl: string; sandboxId: string; roomName: string }` — trimmed values, empty string when a variable is unset.
@@ -152,10 +154,12 @@ git commit -m "feat(config): added env module for LiveKit connection settings"
 ### Task 2: Token service
 
 **Files:**
+
 - Create: `services/livekitToken.ts`
 - Modify: `package.json` (`dependencies`)
 
 **Interfaces:**
+
 - Consumes: `env` from `@/constants/env` (Task 1).
 - Produces: `fetchParticipantToken(participantName: string): Promise<string>` — resolves with a LiveKit access token, rejects with an `Error` when the token server is unreachable or answers with a non-2xx status.
 
@@ -226,10 +230,12 @@ git commit -m "feat(token): added access token fetching from LiveKit token serve
 ### Task 3: Join screen
 
 **Files:**
+
 - Create: `screens/JoinScreen.tsx`
 - Modify: `constants/colors.ts`
 
 **Interfaces:**
+
 - Consumes: `configError` from `@/constants/env` (Task 1), `fetchParticipantToken` from `@/services/livekitToken` (Task 2), `BACKGROUND_COLORS` / `BORDER_COLORS` / `TEXT_COLORS` from `@/constants/colors`.
 - Produces: `JoinScreen` component with props `{ error?: string; onJoined: (token: string) => void }`.
 
@@ -452,10 +458,12 @@ git commit -m "feat(screens): added join screen with participant name input"
 ### Task 4: Wire the app to the join screen
 
 **Files:**
+
 - Modify: `types/index.ts:3-12`
 - Modify: `App.tsx` (whole file — the login UI and its styles leave for `screens/JoinScreen.tsx`)
 
 **Interfaces:**
+
 - Consumes: `JoinScreen` (Task 3), `env` (Task 1), `ActiveRoom` from `@/components/room/ActiveRoom`.
 - Produces: the app's runtime behavior — nothing imports `App.tsx` except `index.js`.
 
@@ -570,7 +578,7 @@ Check, in order:
 2. Pressing "Join" with an empty field shows "Please enter your name" and does not start a request.
 3. Entering a name and pressing "Join" shows the spinner, then the room screen appears — this proves the token server answered and the connection to `env.serverUrl` succeeded.
 4. Leaving the room returns to the login screen.
-5. Join from a second device or emulator under the *same* name: both participants stay in the room (this is what the random identity suffix buys).
+5. Join from a second device or emulator under the _same_ name: both participants stay in the room (this is what the random identity suffix buys).
 
 If step 3 fails with an error message from the token server, the message is
 shown verbatim on the login screen — report it rather than guessing.
@@ -587,9 +595,11 @@ git commit -m "feat(auth): replaced url and token inputs with participant name"
 ### Task 5: Update the README
 
 **Files:**
+
 - Modify: `README.md:24-37` (setup), `README.md:69-74` (usage), `README.md:102-118` (project structure), `README.md:129-142` (types and screens), `README.md:216-224` (support)
 
 **Interfaces:**
+
 - Consumes: the finished behavior from Tasks 1-4.
 - Produces: documentation only.
 
@@ -617,11 +627,11 @@ Copy `.env.example` to `.env.local` and fill in the values:
 cp .env.example .env.local
 ```
 
-| Variable | Meaning |
-| --- | --- |
-| `EXPO_PUBLIC_LIVEKIT_URL` | Project URL, for example `wss://my-project.livekit.cloud` |
-| `EXPO_PUBLIC_LIVEKIT_SANDBOX_ID` | Token server ID |
-| `EXPO_PUBLIC_LIVEKIT_ROOM` | Name of the room every participant joins |
+| Variable                         | Meaning                                                   |
+| -------------------------------- | --------------------------------------------------------- |
+| `EXPO_PUBLIC_LIVEKIT_URL`        | Project URL, for example `wss://my-project.livekit.cloud` |
+| `EXPO_PUBLIC_LIVEKIT_SANDBOX_ID` | Token server ID                                           |
+| `EXPO_PUBLIC_LIVEKIT_ROOM`       | Name of the room every participant joins                  |
 
 `.env.local` is git-ignored. If a variable is missing, the login screen says
 which one and the "Join" button stays disabled.

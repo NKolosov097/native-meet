@@ -65,7 +65,9 @@ Token server решает ту же задачу без секрета на кл
 Единственное место, знающее про token server LiveKit Cloud.
 
 ```ts
-export async function fetchParticipantToken(participantName: string): Promise<string>
+export async function fetchParticipantToken(
+  participantName: string,
+): Promise<string>
 ```
 
 Внутри — созданный на уровне модуля `TokenSource.sandboxTokenServer(env.sandboxId)`,
