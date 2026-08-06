@@ -14,6 +14,7 @@ export const TEXT_COLORS = {
   light: "#FFFFFF",
   secondary: "#333",
   danger: "#FF3B30",
+  placeholder: "#999999",
 }
 
 export const BORDER_COLORS = {
