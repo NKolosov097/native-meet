@@ -56,3 +56,6 @@ metro.config.js
 # Configuration files
 .eslintrc.js
 .prettierrc
+
+# Process artifacts (git-ignored, not meant to be linted)
+.superpowers/

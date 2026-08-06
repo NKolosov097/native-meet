@@ -15,11 +15,22 @@ const createIdentity = (participantName: string): string =>
 export const fetchParticipantToken = async (
   participantName: string,
 ): Promise<string> => {
-  const response = await tokenSource.fetch({
-    roomName: env.roomName,
-    participantName,
-    participantIdentity: createIdentity(participantName),
-  })
+  // Force a fresh fetch: every join mints a new participant identity, so a
+  // cached response is never valid to reuse. This also avoids the cached
+  // response's validity check, which decodes the cached JWT via jose's atob
+  // step — a global that this React Native runtime may not provide.
+  const response = await tokenSource.fetch(
+    {
+      roomName: env.roomName,
+      participantName,
+      participantIdentity: createIdentity(participantName),
+    },
+    true,
+  )
+
+  if (!response.participantToken) {
+    throw new Error("Token server returned an empty access token")
+  }
 
   return response.participantToken
 }

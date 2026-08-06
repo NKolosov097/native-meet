@@ -51,6 +51,10 @@ cp .env.example .env.local
 `.env.local` is git-ignored. If a variable is missing, the login screen says
 which one and the "Join" button stays disabled.
 
+Expo inlines `EXPO_PUBLIC_*` values into the bundle at build time, so if
+Metro is already running when you edit `.env.local`, restart the dev server
+(ideally `npx expo start -c --dev-client`) for the new values to take effect.
+
 ### 4. Run the app
 
 ⚠️ **Important**: this app uses LiveKit native modules and requires an Expo Development Build, not Expo Go.

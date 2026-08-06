@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -30,8 +30,17 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
   const [name, setName] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
+  const [hasStartedJoin, setHasStartedJoin] = useState<boolean>(false)
+  // Guards against onPress and onSubmitEditing both firing in the same tick,
+  // which would otherwise start two concurrent token requests: isLoading
+  // only flips after the first setIsLoading call is processed.
+  const isJoiningRef = useRef<boolean>(false)
 
   const join = useCallback(async (): Promise<void> => {
+    if (isJoiningRef.current) {
+      return
+    }
+
     const participantName = name.trim()
 
     if (!participantName) {
@@ -39,6 +48,8 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
       return
     }
 
+    isJoiningRef.current = true
+    setHasStartedJoin(true)
     setIsLoading(true)
     setTokenError(null)
 
@@ -54,10 +65,12 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
       )
     } finally {
       setIsLoading(false)
+      isJoiningRef.current = false
     }
   }, [name, onJoined])
 
-  const message = configError ?? tokenError ?? error
+  const message =
+    configError ?? tokenError ?? (hasStartedJoin ? undefined : error)
   const isDisabled = isLoading || configError !== null
 
   return (
