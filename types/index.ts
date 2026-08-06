@@ -1,13 +1,8 @@
 // Types for the LiveKit React Native application
 
-export interface AppConfig {
-  url: string
-  token: string
-}
-
 export interface ConnectionState {
-  connected: boolean
-  connecting: boolean
+  // Access token of the current session; null means "not in a room"
+  token: string | null
   error?: string
 }
 
