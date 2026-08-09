@@ -12,6 +12,7 @@ import { StatusBar } from "expo-status-bar"
 
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import {
   BACKGROUND_COLORS,
   BORDER_COLORS,
@@ -99,7 +100,10 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
         )}
 
         <TouchableOpacity
-          style={[styles.joinButton, isDisabled && styles.joinButtonDisabled]}
+          style={[
+            styles.joinButton,
+            isDisabled ? styles.joinButtonDisabled : undefined,
+          ]}
           onPress={join}
           disabled={isDisabled}
           accessibilityLabel="Join room"
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: TEXT_COLORS.light,
     borderWidth: 1,
     borderColor: BORDER_COLORS.lightBorder,
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUSES.medium,
     padding: 15,
     fontSize: 16,
     color: TEXT_COLORS.secondary,
@@ -155,7 +159,7 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     backgroundColor: BACKGROUND_COLORS.tertiary,
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUSES.medium,
     padding: 12,
     marginBottom: 16,
     borderLeftWidth: 4,
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
   },
   joinButton: {
     backgroundColor: BACKGROUND_COLORS.primary,
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUSES.medium,
     padding: 16,
     alignItems: "center",
     marginTop: 20,

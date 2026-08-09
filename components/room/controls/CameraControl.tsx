@@ -18,6 +18,8 @@ import {
   subscribeToMediaDevicesChanged,
   useActiveMediaDevice,
 } from "@/components/room/controls/useActiveMediaDevice"
+import { useBoundedDeviceDropdownLayout } from "@/components/room/controls/useBoundedDeviceDropdownLayout"
+import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import {
   BACKGROUND_COLORS,
   TEXT_COLORS,
@@ -48,6 +50,8 @@ export const CameraControl = ({
   const room = useRoomContext()
   const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([])
   const selectedVideoDevice = useActiveMediaDevice(room, Track.Source.Camera)
+  const { containerRef, onContainerLayout, dropdownPositionStyle } =
+    useBoundedDeviceDropdownLayout(isDropdownVisible)
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
@@ -99,7 +103,11 @@ export const CameraControl = ({
 
   return (
     <>
-      <View style={styles.container}>
+      <View
+        ref={containerRef}
+        style={styles.container}
+        onLayout={onContainerLayout}
+      >
         {/* Camera button */}
         <TouchableOpacity
           style={styles.cameraButton}
@@ -120,7 +128,7 @@ export const CameraControl = ({
           <Text
             style={[
               styles.dropdownArrow,
-              isDropdownVisible && styles.dropdownArrowUp,
+              isDropdownVisible ? styles.dropdownArrowUp : undefined,
             ]}
           >
             ▼
@@ -129,7 +137,7 @@ export const CameraControl = ({
 
         {/* Camera dropdown list */}
         {isDropdownVisible && (
-          <View style={styles.dropdownContainer}>
+          <View style={[styles.dropdownContainer, dropdownPositionStyle]}>
             <ScrollView style={styles.deviceList}>
               <Text style={styles.sectionTitle}>Select camera</Text>
 
@@ -138,8 +146,9 @@ export const CameraControl = ({
                   key={device.deviceId}
                   style={[
                     styles.deviceItem,
-                    selectedVideoDevice === device.deviceId &&
-                      styles.selectedDevice,
+                    selectedVideoDevice === device.deviceId
+                      ? styles.selectedDevice
+                      : undefined,
                   ]}
                   onPress={() => handleDeviceSelect(device.deviceId)}
                 >
@@ -180,8 +189,8 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_COLORS.secondary,
     width: 50,
     height: 50,
-    borderTopLeftRadius: 25,
-    borderBottomLeftRadius: 25,
+    borderTopLeftRadius: BORDER_RADIUSES.pill,
+    borderBottomLeftRadius: BORDER_RADIUSES.pill,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -189,8 +198,8 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_COLORS.secondary,
     width: 30,
     height: 50,
-    borderTopRightRadius: 25,
-    borderBottomRightRadius: 25,
+    borderTopRightRadius: BORDER_RADIUSES.pill,
+    borderBottomRightRadius: BORDER_RADIUSES.pill,
     marginLeft: -5,
     justifyContent: "center",
     alignItems: "center",
@@ -206,10 +215,8 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     position: "absolute",
     bottom: 55,
-    left: 0,
     backgroundColor: BACKGROUND_COLORS.lightBackground,
-    borderRadius: 12,
-    minWidth: 300,
+    borderRadius: BORDER_RADIUSES.large,
     maxHeight: 400,
     shadowColor: SHADOW_COLORS.black,
     shadowOffset: {
@@ -223,6 +230,8 @@ const styles = StyleSheet.create({
   },
   deviceList: {
     maxHeight: 350,
+    borderRadius: BORDER_RADIUSES.large,
+    overflow: "hidden",
   },
   sectionTitle: {
     fontSize: 16,
@@ -231,8 +240,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: BACKGROUND_COLORS.lightBackground,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
   },
   deviceItem: {
     flexDirection: "row",

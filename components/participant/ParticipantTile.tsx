@@ -11,6 +11,7 @@ import {
 import { Track } from "livekit-client"
 
 import { MicDisabledIcon, ParticipantPlaceholderIcon } from "@/components/icons"
+import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
 const { width, height } = Dimensions.get("window")
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     height: TILE_HEIGHT,
     margin: 5,
     backgroundColor: BACKGROUND_COLORS.secondary,
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUSES.medium,
     overflow: "hidden",
   },
   videoView: {
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeOnVideo: {
-    borderRadius: 6,
+    borderRadius: BORDER_RADIUSES.small,
     overflow: "hidden",
     backgroundColor: BADGE_BACKGROUND,
   },

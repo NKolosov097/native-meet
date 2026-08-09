@@ -115,6 +115,15 @@ module.exports = {
     ],
 
     // General rules
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector:
+          "JSXAttribute[name.name='style'] LogicalExpression[operator='&&'][right.type='MemberExpression'][right.object.name='styles']",
+        message:
+          "Use condition ? styles.name : undefined for conditional JSX styles.",
+      },
+    ],
     "prefer-const": "error",
     "no-var": "error",
     "object-shorthand": "error",

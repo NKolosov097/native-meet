@@ -5,6 +5,7 @@ import { useLocalParticipant, useRoomContext } from "@livekit/react-native"
 import { Track } from "livekit-client"
 
 import { DisconnectIcon } from "@/components/icons"
+import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
 import { CameraControl } from "./controls/CameraControl"
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_COLORS.secondary,
     width: 50,
     height: 50,
-    borderRadius: 25,
+    borderRadius: BORDER_RADIUSES.pill,
     justifyContent: "center",
     alignItems: "center",
   },
