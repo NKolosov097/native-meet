@@ -1,6 +1,8 @@
-import { SafeAreaView, StyleSheet } from "react-native"
+import { StyleSheet } from "react-native"
 
 import { StatusBar } from "expo-status-bar"
+
+import { SafeAreaView } from "react-native-safe-area-context"
 
 import { BACKGROUND_COLORS } from "@/constants/colors"
 

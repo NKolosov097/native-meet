@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
 import { LogBox } from "react-native"
 
+import { SafeAreaProvider } from "react-native-safe-area-context"
+
 import { LiveKitRoom } from "@livekit/react-native"
 import {
   VideoPresets,
@@ -64,21 +66,23 @@ export default () => {
     })
   }, [])
 
-  if (connectionState.token === null) {
-    return <JoinScreen error={connectionState.error} onJoined={onJoined} />
-  }
-
   return (
-    <LiveKitRoom
-      serverUrl={env.serverUrl}
-      token={connectionState.token}
-      connect
-      onDisconnected={onDisconnect}
-      onError={onConnectionError}
-      options={roomOptions}
-      connectOptions={connectOptions}
-    >
-      <ActiveRoom />
-    </LiveKitRoom>
+    <SafeAreaProvider>
+      {connectionState.token === null ? (
+        <JoinScreen error={connectionState.error} onJoined={onJoined} />
+      ) : (
+        <LiveKitRoom
+          serverUrl={env.serverUrl}
+          token={connectionState.token}
+          connect
+          onDisconnected={onDisconnect}
+          onError={onConnectionError}
+          options={roomOptions}
+          connectOptions={connectOptions}
+        >
+          <ActiveRoom />
+        </LiveKitRoom>
+      )}
+    </SafeAreaProvider>
   )
 }
