@@ -10,8 +10,13 @@ import {
 } from "react-native"
 
 import { useRoomContext } from "@livekit/react-native"
+import { Track } from "livekit-client"
 
 import { MicDisabledIcon, MicIcon } from "@/components/icons"
+import {
+  subscribeToMediaDevicesChanged,
+  useActiveMediaDevice,
+} from "@/components/room/controls/useActiveMediaDevice"
 import {
   BACKGROUND_COLORS,
   TEXT_COLORS,
@@ -41,8 +46,11 @@ export const MicrophoneControl = ({
 }: MicrophoneControlProps) => {
   const room = useRoomContext()
   const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([])
-  const [selectedInputDevice, setSelectedInputDevice] = useState<string>("")
-  const [selectedOutputDevice, setSelectedOutputDevice] = useState<string>("")
+  const selectedInputDevice = useActiveMediaDevice(
+    room,
+    Track.Source.Microphone,
+  )
+  const selectedOutputDevice = useActiveMediaDevice(room, "audiooutput")
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
@@ -76,7 +84,9 @@ export const MicrophoneControl = ({
 
   useEffect(() => {
     loadAudioDevices()
-  }, [loadAudioDevices])
+
+    return subscribeToMediaDevicesChanged(room, loadAudioDevices)
+  }, [room, loadAudioDevices])
 
   const handleDeviceSelect = useCallback(
     async (deviceId: string, kind: "audioinput" | "audiooutput") => {
@@ -86,11 +96,9 @@ export const MicrophoneControl = ({
         if (kind === "audioinput") {
           // Switch the microphone
           await room.switchActiveDevice("audioinput", deviceId)
-          setSelectedInputDevice(deviceId)
         } else {
           // Switch the speakers
           await room.switchActiveDevice("audiooutput", deviceId)
-          setSelectedOutputDevice(deviceId)
         }
 
         onCloseDropdown()
@@ -108,7 +116,6 @@ export const MicrophoneControl = ({
   const outputDevices = audioDevices.filter(
     device => device.kind === "audiooutput",
   )
-  const hasInputAndOutput = inputDevices.length > 0 && outputDevices.length > 0
 
   return (
     <>
@@ -142,35 +149,10 @@ export const MicrophoneControl = ({
         {isDropdownVisible && (
           <View style={styles.dropdownContainer}>
             <ScrollView style={styles.deviceList}>
-              {hasInputAndOutput ? (
+              {inputDevices.length > 0 && (
                 <>
-                  {/* Output devices section */}
-                  <Text style={styles.sectionTitle}>Select speakers</Text>
-                  {outputDevices.map(device => (
-                    <TouchableOpacity
-                      key={device.deviceId}
-                      style={[
-                        styles.deviceItem,
-                        selectedOutputDevice === device.deviceId &&
-                          styles.selectedDevice,
-                      ]}
-                      onPress={() =>
-                        handleDeviceSelect(device.deviceId, "audiooutput")
-                      }
-                    >
-                      <Text style={styles.deviceLabel}>{device.label}</Text>
-                      {selectedOutputDevice === device.deviceId && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
-                    </TouchableOpacity>
-                  ))}
-
                   {/* Input devices section */}
-                  <Text
-                    style={[styles.sectionTitle, styles.sectionTitleSecond]}
-                  >
-                    Select microphone
-                  </Text>
+                  <Text style={styles.sectionTitle}>Select microphone</Text>
                   {inputDevices.map(device => (
                     <TouchableOpacity
                       key={device.deviceId}
@@ -190,33 +172,29 @@ export const MicrophoneControl = ({
                     </TouchableOpacity>
                   ))}
                 </>
-              ) : (
+              )}
+
+              {outputDevices.length > 0 && (
                 <>
-                  {/* Combined list of all audio devices */}
-                  <Text style={styles.sectionTitle}>Select microphone</Text>
-                  {audioDevices.map(device => (
+                  <Text
+                    style={[styles.sectionTitle, styles.sectionTitleSecond]}
+                  >
+                    Select speakers
+                  </Text>
+                  {outputDevices.map(device => (
                     <TouchableOpacity
                       key={device.deviceId}
                       style={[
                         styles.deviceItem,
-                        ((device.kind === "audioinput" &&
-                          selectedInputDevice === device.deviceId) ||
-                          (device.kind === "audiooutput" &&
-                            selectedOutputDevice === device.deviceId)) &&
+                        selectedOutputDevice === device.deviceId &&
                           styles.selectedDevice,
                       ]}
                       onPress={() =>
-                        handleDeviceSelect(device.deviceId, device.kind)
+                        handleDeviceSelect(device.deviceId, "audiooutput")
                       }
                     >
-                      <Text style={styles.deviceLabel}>
-                        {device.label} (
-                        {device.kind === "audioinput" ? "Input" : "Output"})
-                      </Text>
-                      {((device.kind === "audioinput" &&
-                        selectedInputDevice === device.deviceId) ||
-                        (device.kind === "audiooutput" &&
-                          selectedOutputDevice === device.deviceId)) && (
+                      <Text style={styles.deviceLabel}>{device.label}</Text>
+                      {selectedOutputDevice === device.deviceId && (
                         <Text style={styles.checkmark}>✓</Text>
                       )}
                     </TouchableOpacity>
