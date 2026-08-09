@@ -1,47 +1,48 @@
-import { Dimensions, StyleSheet, Text, View } from "react-native"
+import { useMemo } from "react"
+import { StyleSheet, Text, View } from "react-native"
 
-import { VideoTrack, useTracks } from "@livekit/react-native"
-import { Track } from "livekit-client"
+import { useTracks } from "@livekit/react-native"
+import { ParticipantKind, Track } from "livekit-client"
 
-import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
+import { ParticipantTile } from "@/components/participant/ParticipantTile"
+import { TEXT_COLORS } from "@/constants/colors"
 
-const { width, height } = Dimensions.get("window")
+const tracksOption = [
+  { source: Track.Source.Camera, withPlaceholder: true },
+  { source: Track.Source.ScreenShare, withPlaceholder: false },
+]
 
-const tracksOption: Track.Source[] = [
-  Track.Source.Camera,
-  Track.Source.ScreenShare,
-  Track.Source.Microphone,
+const VISIBLE_PARTICIPANT_KINDS: ParticipantKind[] = [
+  ParticipantKind.STANDARD,
+  ParticipantKind.SIP,
 ]
 
 export const VideoConference = () => {
   const tracks = useTracks(tracksOption)
 
-  if (tracks.length === 0) {
+  const participantTracks = useMemo(
+    () =>
+      tracks.filter(track =>
+        VISIBLE_PARTICIPANT_KINDS.includes(track.participant.kind),
+      ),
+    [tracks],
+  )
+
+  if (participantTracks.length === 0) {
     return (
       <View style={styles.noVideo}>
-        <Text style={styles.noVideoText}>No video streams available</Text>
+        <Text style={styles.noVideoText}>No participants in the room</Text>
       </View>
     )
   }
 
   return (
     <View style={styles.participantsContainer}>
-      {tracks.map(track => (
-        <View
-          key={track.publication.trackSid}
-          style={styles.participantContainer}
-        >
-          <VideoTrack
-            style={styles.videoView}
-            trackRef={track}
-            mirror={track.participant.isLocal}
-          />
-
-          <Text style={styles.participantName}>
-            {track.participant.name || track.participant.identity}
-            {track.participant.isLocal ? " (You)" : ""}
-          </Text>
-        </View>
+      {participantTracks.map(track => (
+        <ParticipantTile
+          key={`${track.participant.identity}-${track.source}`}
+          trackRef={track}
+        />
       ))}
     </View>
   )
@@ -62,28 +63,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     padding: 10,
-  },
-  participantContainer: {
-    width: width / 2 - 15,
-    height: height / 3,
-    margin: 5,
-    backgroundColor: BACKGROUND_COLORS.secondary,
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  videoView: {
-    flex: 1,
-  },
-  participantName: {
-    position: "absolute",
-    bottom: 10,
-    left: 10,
-    color: TEXT_COLORS.light,
-    fontSize: 14,
-    fontWeight: "600",
-    backgroundColor: BACKGROUND_COLORS.tertiary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
   },
 })
