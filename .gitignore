@@ -43,3 +43,4 @@ yarn-error.*
 # local design docs and agent workspace
 docs/superpowers/
 .superpowers/
+.worktrees/
