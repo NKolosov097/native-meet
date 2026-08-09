@@ -174,9 +174,6 @@ export const MicrophoneControl = ({
                       }
                     >
                       <Text style={styles.deviceLabel}>{device.label}</Text>
-                      {selectedOutputDevice === device.deviceId && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
                     </TouchableOpacity>
                   ))}
 
@@ -199,9 +196,6 @@ export const MicrophoneControl = ({
                       }
                     >
                       <Text style={styles.deviceLabel}>{device.label}</Text>
-                      {selectedInputDevice === device.deviceId && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
                     </TouchableOpacity>
                   ))}
                 </>
@@ -228,12 +222,6 @@ export const MicrophoneControl = ({
                         {device.label} (
                         {device.kind === "audioinput" ? "Input" : "Output"})
                       </Text>
-                      {((device.kind === "audioinput" &&
-                        selectedInputDevice === device.deviceId) ||
-                        (device.kind === "audiooutput" &&
-                          selectedOutputDevice === device.deviceId)) && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
                     </TouchableOpacity>
                   ))}
                 </>
@@ -354,11 +342,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: TEXT_COLORS.light,
     flex: 1,
-  },
-  checkmark: {
-    fontSize: 16,
-    color: TEXT_COLORS.light,
-    fontWeight: "bold",
   },
   noDevicesText: {
     fontSize: 14,

@@ -144,9 +144,6 @@ export const CameraControl = ({
                   onPress={() => handleDeviceSelect(device.deviceId)}
                 >
                   <Text style={styles.deviceLabel}>{device.label}</Text>
-                  {selectedVideoDevice === device.deviceId && (
-                    <Text style={styles.checkmark}>✓</Text>
-                  )}
                 </TouchableOpacity>
               ))}
 
@@ -262,11 +259,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: TEXT_COLORS.light,
     flex: 1,
-  },
-  checkmark: {
-    fontSize: 16,
-    color: TEXT_COLORS.light,
-    fontWeight: "bold",
   },
   noDevicesText: {
     fontSize: 14,
