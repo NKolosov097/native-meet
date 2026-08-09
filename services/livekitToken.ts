@@ -1,20 +1,20 @@
 import { TokenSource } from "livekit-client"
 
 import { env } from "@/constants/env"
+import { getDeviceIdentity } from "@/services/deviceIdentity"
 
 const tokenSource = TokenSource.sandboxTokenServer(env.sandboxId)
-
-const createIdentity = (participantName: string): string =>
-  `${participantName}-${Math.random().toString(36).slice(2, 8)}`
 
 export const fetchParticipantToken = async (
   participantName: string,
 ): Promise<string> => {
+  const participantIdentity = await getDeviceIdentity()
+
   const response = await tokenSource.fetch(
     {
       roomName: env.roomName,
       participantName,
-      participantIdentity: createIdentity(participantName),
+      participantIdentity,
     },
     true,
   )
