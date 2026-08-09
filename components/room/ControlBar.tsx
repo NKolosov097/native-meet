@@ -1,13 +1,13 @@
 import { useCallback, useRef } from "react"
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native"
 
 import { useLocalParticipant, useRoomContext } from "@livekit/react-native"
 
+import { DisconnectIcon } from "@/components/icons"
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
 import { CameraControl } from "./controls/CameraControl"
 import { MicrophoneControl } from "./controls/MicrophoneControl"
-import { ScreenModeControl } from "./controls/ScreenModeControl"
 
 export const ControlBar = () => {
   const room = useRoomContext()
@@ -70,16 +70,13 @@ export const ControlBar = () => {
         onToggleVideo={toggleVideo}
       />
 
-      {/* Screen mode control component */}
-      <ScreenModeControl />
-
       {/* Disconnect button */}
       <TouchableOpacity
         style={[styles.controlButton, styles.disconnectButton]}
         onPress={disconnect}
         accessibilityLabel="Disconnect from room"
       >
-        <Text style={styles.controlButtonText}>Disconnect</Text>
+        <DisconnectIcon />
       </TouchableOpacity>
     </View>
   )
@@ -88,7 +85,7 @@ export const ControlBar = () => {
 const styles = StyleSheet.create({
   controlsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 20,
@@ -96,16 +93,11 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     backgroundColor: BACKGROUND_COLORS.secondary,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    width: 50,
+    height: 50,
     borderRadius: 25,
-    minWidth: 80,
+    justifyContent: "center",
     alignItems: "center",
-  },
-  controlButtonText: {
-    color: TEXT_COLORS.light,
-    fontSize: 14,
-    fontWeight: "600",
   },
   disconnectButton: {
     backgroundColor: TEXT_COLORS.danger,

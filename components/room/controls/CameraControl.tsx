@@ -52,14 +52,14 @@ export const CameraControl = ({
           .filter(device => device.kind === "videoinput")
           .map(device => ({
             deviceId: device.deviceId,
-            label: device.label || `Камера ${device.deviceId.slice(0, 8)}`,
+            label: device.label || `Camera ${device.deviceId.slice(0, 8)}`,
             kind: device.kind as "videoinput",
           }))
 
         setVideoDevices(deviceList)
       }
     } catch (error) {
-      console.error("Ошибка при получении списка видео устройств:", error)
+      console.error("Error loading video devices: ", error)
     }
   }, [])
 
@@ -77,8 +77,8 @@ export const CameraControl = ({
         setSelectedVideoDevice(deviceId)
         setIsDropdownVisible(false)
       } catch (error) {
-        console.error("Ошибка при переключении камеры:", error)
-        Alert.alert("Ошибка", "Не удалось переключить камеру")
+        console.error("Error switching camera: ", error)
+        Alert.alert("Error", "Failed to switch camera")
       }
     },
     [room],
@@ -92,7 +92,7 @@ export const CameraControl = ({
           style={styles.cameraButton}
           onPress={onToggleVideo}
           accessibilityLabel={
-            isVideoEnabled ? "Выключить камеру" : "Включить камеру"
+            isVideoEnabled ? "Turn off camera" : "Turn on camera"
           }
         >
           {isVideoEnabled ? <CameraIcon /> : <CameraDisabledIcon />}
@@ -102,7 +102,7 @@ export const CameraControl = ({
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => setIsDropdownVisible(!isDropdownVisible)}
-          accessibilityLabel="Выбрать камеру"
+          accessibilityLabel="Select camera"
         >
           <Text
             style={[
@@ -118,7 +118,7 @@ export const CameraControl = ({
         {isDropdownVisible && (
           <View style={styles.dropdownContainer}>
             <ScrollView style={styles.deviceList}>
-              <Text style={styles.sectionTitle}>Выберите камеру</Text>
+              <Text style={styles.sectionTitle}>Select camera</Text>
 
               {videoDevices.map(device => (
                 <TouchableOpacity
@@ -138,7 +138,7 @@ export const CameraControl = ({
               ))}
 
               {videoDevices.length === 0 && (
-                <Text style={styles.noDevicesText}>Камеры не найдены</Text>
+                <Text style={styles.noDevicesText}>No cameras found</Text>
               )}
             </ScrollView>
           </View>
@@ -150,7 +150,7 @@ export const CameraControl = ({
         <Pressable
           style={styles.overlay}
           onPress={handleOutsidePress}
-          accessibilityLabel="Закрыть список камер"
+          accessibilityLabel="Close camera list"
         />
       )}
     </>
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    marginLeft: 20,
     zIndex: 999,
   },
   cameraButton: {

@@ -116,10 +116,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-  },
-  badgeOnVideo: {
     paddingHorizontal: 8,
     paddingVertical: 4,
+  },
+  badgeOnVideo: {
     borderRadius: 6,
     overflow: "hidden",
     backgroundColor: BADGE_BACKGROUND,

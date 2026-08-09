@@ -58,14 +58,14 @@ export const MicrophoneControl = ({
             deviceId: device.deviceId,
             label:
               device.label ||
-              `${device.kind === "audioinput" ? "Микрофон" : "Динамик"} ${device.deviceId.slice(0, 8)}`,
+              `${device.kind === "audioinput" ? "Microphone" : "Speaker"} ${device.deviceId.slice(0, 8)}`,
             kind: device.kind as "audioinput" | "audiooutput",
           }))
 
         setAudioDevices(deviceList)
       }
     } catch (error) {
-      console.error("Ошибка при получении списка аудио устройств:", error)
+      console.error("Error loading audio devices: ", error)
     }
   }, [])
 
@@ -90,8 +90,8 @@ export const MicrophoneControl = ({
 
         setIsDropdownVisible(false)
       } catch (error) {
-        console.error("Ошибка при переключении аудио устройства:", error)
-        Alert.alert("Ошибка", "Не удалось переключить аудио устройство")
+        console.error("Error switching audio device: ", error)
+        Alert.alert("Error", "Failed to switch audio device")
       }
     },
     [room],
@@ -112,9 +112,7 @@ export const MicrophoneControl = ({
         <TouchableOpacity
           style={styles.micButton}
           onPress={onToggleMute}
-          accessibilityLabel={
-            isMuted ? "Включить микрофон" : "Выключить микрофон"
-          }
+          accessibilityLabel={isMuted ? "Unmute microphone" : "Mute microphone"}
         >
           {isMuted ? <MicDisabledIcon /> : <MicIcon />}
         </TouchableOpacity>
@@ -123,7 +121,7 @@ export const MicrophoneControl = ({
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => setIsDropdownVisible(!isDropdownVisible)}
-          accessibilityLabel="Выбрать аудио устройство"
+          accessibilityLabel="Select audio device"
         >
           <Text
             style={[
@@ -142,7 +140,7 @@ export const MicrophoneControl = ({
               {hasInputAndOutput ? (
                 <>
                   {/* Output devices section */}
-                  <Text style={styles.sectionTitle}>Выберите динамики</Text>
+                  <Text style={styles.sectionTitle}>Select speakers</Text>
                   {outputDevices.map(device => (
                     <TouchableOpacity
                       key={device.deviceId}
@@ -166,7 +164,7 @@ export const MicrophoneControl = ({
                   <Text
                     style={[styles.sectionTitle, styles.sectionTitleSecond]}
                   >
-                    Выберите микрофон
+                    Select microphone
                   </Text>
                   {inputDevices.map(device => (
                     <TouchableOpacity
@@ -190,7 +188,7 @@ export const MicrophoneControl = ({
               ) : (
                 <>
                   {/* Combined list of all audio devices */}
-                  <Text style={styles.sectionTitle}>Выберите микрофон</Text>
+                  <Text style={styles.sectionTitle}>Select microphone</Text>
                   {audioDevices.map(device => (
                     <TouchableOpacity
                       key={device.deviceId}
@@ -208,7 +206,7 @@ export const MicrophoneControl = ({
                     >
                       <Text style={styles.deviceLabel}>
                         {device.label} (
-                        {device.kind === "audioinput" ? "Ввод" : "Вывод"})
+                        {device.kind === "audioinput" ? "Input" : "Output"})
                       </Text>
                       {((device.kind === "audioinput" &&
                         selectedInputDevice === device.deviceId) ||
@@ -222,9 +220,7 @@ export const MicrophoneControl = ({
               )}
 
               {audioDevices.length === 0 && (
-                <Text style={styles.noDevicesText}>
-                  Аудио устройства не найдены
-                </Text>
+                <Text style={styles.noDevicesText}>No audio devices found</Text>
               )}
             </ScrollView>
           </View>
@@ -236,7 +232,7 @@ export const MicrophoneControl = ({
         <Pressable
           style={styles.overlay}
           onPress={handleOutsidePress}
-          accessibilityLabel="Закрыть список устройств"
+          accessibilityLabel="Close device list"
         />
       )}
     </>

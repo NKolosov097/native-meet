@@ -1,5 +1,6 @@
 export { CameraDisabledIcon } from "./CameraDisabledIcon"
 export { CameraIcon } from "./CameraIcon"
+export { DisconnectIcon } from "./DisconnectIcon"
 export { MicDisabledIcon } from "./MicDisabledIcon"
 export { MicIcon } from "./MicIcon"
 export { ParticipantPlaceholderIcon } from "./ParticipantPlaceholderIcon"
