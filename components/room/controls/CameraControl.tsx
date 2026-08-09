@@ -14,6 +14,7 @@ import { Track } from "livekit-client"
 
 import { CameraDisabledIcon, CameraIcon } from "@/components/icons"
 import {
+  initializeActiveMediaDevice,
   subscribeToMediaDevicesChanged,
   useActiveMediaDevice,
 } from "@/components/room/controls/useActiveMediaDevice"
@@ -67,11 +68,12 @@ export const CameraControl = ({
           }))
 
         setVideoDevices(deviceList)
+        await initializeActiveMediaDevice(room, Track.Source.Camera, deviceList)
       }
     } catch (error) {
       console.error("Error loading video devices: ", error)
     }
-  }, [])
+  }, [room])
 
   useEffect(() => {
     loadVideoDevices()

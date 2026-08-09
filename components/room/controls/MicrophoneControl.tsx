@@ -14,6 +14,7 @@ import { Track } from "livekit-client"
 
 import { MicDisabledIcon, MicIcon } from "@/components/icons"
 import {
+  initializeActiveMediaDevice,
   subscribeToMediaDevicesChanged,
   useActiveMediaDevice,
 } from "@/components/room/controls/useActiveMediaDevice"
@@ -76,11 +77,16 @@ export const MicrophoneControl = ({
           }))
 
         setAudioDevices(deviceList)
+        await initializeActiveMediaDevice(
+          room,
+          Track.Source.Microphone,
+          deviceList.filter(device => device.kind === "audioinput"),
+        )
       }
     } catch (error) {
       console.error("Error loading audio devices: ", error)
     }
-  }, [])
+  }, [room])
 
   useEffect(() => {
     loadAudioDevices()

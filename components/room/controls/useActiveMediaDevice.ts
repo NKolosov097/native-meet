@@ -7,6 +7,7 @@ export type InputDeviceSource = Track.Source.Camera | Track.Source.Microphone
 export type ActiveDeviceTarget = InputDeviceSource
 
 type ActiveMediaDeviceKind = "audioinput" | "videoinput"
+type AvailableMediaDevice = Pick<MediaDeviceInfo, "deviceId">
 
 const getMediaDeviceKind = (
   target: ActiveDeviceTarget,
@@ -22,6 +23,25 @@ const getMediaDeviceKind = (
       return exhaustiveTarget
     }
   }
+}
+
+export const initializeActiveMediaDevice = async (
+  room: Room,
+  sourceOrKind: ActiveDeviceTarget,
+  availableDevices: AvailableMediaDevice[],
+): Promise<void> => {
+  const mediaDeviceKind = getMediaDeviceKind(sourceOrKind)
+  const activeDevice = room.getActiveDevice(mediaDeviceKind)
+  const hasActiveDevice = availableDevices.some(
+    device => device.deviceId === activeDevice,
+  )
+  const fallbackDevice = availableDevices[0]
+
+  if (hasActiveDevice || !fallbackDevice) {
+    return
+  }
+
+  await room.switchActiveDevice(mediaDeviceKind, fallbackDevice.deviceId)
 }
 
 export const useActiveMediaDevice = (
