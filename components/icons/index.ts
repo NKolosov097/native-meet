@@ -1,0 +1,5 @@
+export { CameraDisabledIcon } from "./CameraDisabledIcon"
+export { CameraIcon } from "./CameraIcon"
+export { MicDisabledIcon } from "./MicDisabledIcon"
+export { MicIcon } from "./MicIcon"
+export type { IconProps } from "./types"

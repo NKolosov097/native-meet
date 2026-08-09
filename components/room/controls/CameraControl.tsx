@@ -11,6 +11,7 @@ import {
 
 import { useRoomContext } from "@livekit/react-native"
 
+import { CameraDisabledIcon, CameraIcon } from "@/components/icons"
 import {
   BACKGROUND_COLORS,
   TEXT_COLORS,
@@ -88,16 +89,13 @@ export const CameraControl = ({
       <View style={styles.container}>
         {/* Camera button */}
         <TouchableOpacity
-          style={[
-            styles.cameraButton,
-            !isVideoEnabled && styles.cameraButtonDisabled,
-          ]}
+          style={styles.cameraButton}
           onPress={onToggleVideo}
           accessibilityLabel={
             isVideoEnabled ? "Выключить камеру" : "Включить камеру"
           }
         >
-          <Text style={styles.cameraIcon}>📹</Text>
+          {isVideoEnabled ? <CameraIcon /> : <CameraDisabledIcon />}
         </TouchableOpacity>
 
         {/* Dropdown list button */}
@@ -177,12 +175,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-  },
-  cameraButtonDisabled: {
-    backgroundColor: TEXT_COLORS.danger,
-  },
-  cameraIcon: {
-    fontSize: 20,
   },
   dropdownButton: {
     backgroundColor: BACKGROUND_COLORS.secondary,

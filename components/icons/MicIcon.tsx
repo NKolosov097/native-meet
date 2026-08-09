@@ -1,0 +1,25 @@
+import React from "react"
+
+import { Path, Svg } from "react-native-svg"
+
+import { TEXT_COLORS } from "@/constants/colors"
+
+import { IconProps } from "./types"
+
+export const MicIcon = ({
+  size = 22,
+  color = TEXT_COLORS.light,
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 16 16">
+    <Path
+      clipRule="evenodd"
+      fillRule="evenodd"
+      fill={color}
+      d="m2.97529 8.00245c.27479-.02729.51967.17336.54695.44815.22572 2.2735 2.14465 4.0494 4.47776 4.0494 2.3331 0 4.252-1.7759 4.4778-4.0494.0272-.27479.2721-.47544.5469-.44815.2748.02728.4754.27216.4482.54695-.2597 2.6156-2.3508 4.6919-4.9729 4.9282v1.5224h2c.2761 0 .5.2239.5.5s-.2239.5-.5.5h-5c-.27614 0-.5-.2239-.5-.5s.22386-.5.5-.5h2v-1.5224c-2.62212-.2363-4.71317-2.3126-4.97287-4.9282-.02728-.27479.17337-.51967.44816-.54695z"
+    />
+    <Path
+      fill={color}
+      d="m5 3c0-1.65685 1.34314-3 3-3 1.65685 0 3 1.34315 3 3v5c0 1.65685-1.34315 3-3 3-1.65686 0-3-1.34315-3-3z"
+    />
+  </Svg>
+)

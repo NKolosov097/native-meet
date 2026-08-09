@@ -11,6 +11,7 @@ import {
 
 import { useRoomContext } from "@livekit/react-native"
 
+import { MicDisabledIcon, MicIcon } from "@/components/icons"
 import {
   BACKGROUND_COLORS,
   TEXT_COLORS,
@@ -109,13 +110,13 @@ export const MicrophoneControl = ({
       <View style={styles.container}>
         {/* Microphone button */}
         <TouchableOpacity
-          style={[styles.micButton, isMuted && styles.micButtonMuted]}
+          style={styles.micButton}
           onPress={onToggleMute}
           accessibilityLabel={
             isMuted ? "Включить микрофон" : "Выключить микрофон"
           }
         >
-          <Text style={styles.micIcon}>🎤</Text>
+          {isMuted ? <MicDisabledIcon /> : <MicIcon />}
         </TouchableOpacity>
 
         {/* Dropdown list button */}
@@ -259,12 +260,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-  },
-  micButtonMuted: {
-    backgroundColor: TEXT_COLORS.danger,
-  },
-  micIcon: {
-    fontSize: 20,
   },
   dropdownButton: {
     backgroundColor: BACKGROUND_COLORS.secondary,
