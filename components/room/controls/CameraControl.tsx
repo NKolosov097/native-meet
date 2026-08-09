@@ -10,8 +10,13 @@ import {
 } from "react-native"
 
 import { useRoomContext } from "@livekit/react-native"
+import { Track } from "livekit-client"
 
 import { CameraDisabledIcon, CameraIcon } from "@/components/icons"
+import {
+  subscribeToMediaDevicesChanged,
+  useActiveMediaDevice,
+} from "@/components/room/controls/useActiveMediaDevice"
 import {
   BACKGROUND_COLORS,
   TEXT_COLORS,
@@ -41,7 +46,7 @@ export const CameraControl = ({
 }: CameraControlProps) => {
   const room = useRoomContext()
   const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([])
-  const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>("")
+  const selectedVideoDevice = useActiveMediaDevice(room, Track.Source.Camera)
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
@@ -70,7 +75,9 @@ export const CameraControl = ({
 
   useEffect(() => {
     loadVideoDevices()
-  }, [loadVideoDevices])
+
+    return subscribeToMediaDevicesChanged(room, loadVideoDevices)
+  }, [room, loadVideoDevices])
 
   const handleDeviceSelect = useCallback(
     async (deviceId: string) => {
@@ -79,7 +86,6 @@ export const CameraControl = ({
 
         // Switch the camera
         await room.switchActiveDevice("videoinput", deviceId)
-        setSelectedVideoDevice(deviceId)
         onCloseDropdown()
       } catch (error) {
         console.error("Error switching camera: ", error)
