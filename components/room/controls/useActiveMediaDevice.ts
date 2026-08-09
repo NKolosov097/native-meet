@@ -4,9 +4,9 @@ import { Room, RoomEvent, Track } from "livekit-client"
 
 export type InputDeviceSource = Track.Source.Camera | Track.Source.Microphone
 
-export type ActiveDeviceTarget = InputDeviceSource | "audiooutput"
+export type ActiveDeviceTarget = InputDeviceSource
 
-type ActiveMediaDeviceKind = "audioinput" | "audiooutput" | "videoinput"
+type ActiveMediaDeviceKind = "audioinput" | "videoinput"
 
 const getMediaDeviceKind = (
   target: ActiveDeviceTarget,
@@ -16,8 +16,6 @@ const getMediaDeviceKind = (
       return "videoinput"
     case Track.Source.Microphone:
       return "audioinput"
-    case "audiooutput":
-      return "audiooutput"
     default: {
       const exhaustiveTarget: never = target
 

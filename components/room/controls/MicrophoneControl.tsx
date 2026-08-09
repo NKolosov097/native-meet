@@ -50,7 +50,7 @@ export const MicrophoneControl = ({
     room,
     Track.Source.Microphone,
   )
-  const selectedOutputDevice = useActiveMediaDevice(room, "audiooutput")
+  const [selectedOutputDevice, setSelectedOutputDevice] = useState<string>("")
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
@@ -99,6 +99,7 @@ export const MicrophoneControl = ({
         } else {
           // Switch the speakers
           await room.switchActiveDevice("audiooutput", deviceId)
+          setSelectedOutputDevice(deviceId)
         }
 
         onCloseDropdown()
@@ -116,6 +117,7 @@ export const MicrophoneControl = ({
   const outputDevices = audioDevices.filter(
     device => device.kind === "audiooutput",
   )
+  const hasInputAndOutput = inputDevices.length > 0 && outputDevices.length > 0
 
   return (
     <>
@@ -149,10 +151,35 @@ export const MicrophoneControl = ({
         {isDropdownVisible && (
           <View style={styles.dropdownContainer}>
             <ScrollView style={styles.deviceList}>
-              {inputDevices.length > 0 && (
+              {hasInputAndOutput ? (
                 <>
+                  {/* Output devices section */}
+                  <Text style={styles.sectionTitle}>Select speakers</Text>
+                  {outputDevices.map(device => (
+                    <TouchableOpacity
+                      key={device.deviceId}
+                      style={[
+                        styles.deviceItem,
+                        selectedOutputDevice === device.deviceId &&
+                          styles.selectedDevice,
+                      ]}
+                      onPress={() =>
+                        handleDeviceSelect(device.deviceId, "audiooutput")
+                      }
+                    >
+                      <Text style={styles.deviceLabel}>{device.label}</Text>
+                      {selectedOutputDevice === device.deviceId && (
+                        <Text style={styles.checkmark}>✓</Text>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+
                   {/* Input devices section */}
-                  <Text style={styles.sectionTitle}>Select microphone</Text>
+                  <Text
+                    style={[styles.sectionTitle, styles.sectionTitleSecond]}
+                  >
+                    Select microphone
+                  </Text>
                   {inputDevices.map(device => (
                     <TouchableOpacity
                       key={device.deviceId}
@@ -172,29 +199,33 @@ export const MicrophoneControl = ({
                     </TouchableOpacity>
                   ))}
                 </>
-              )}
-
-              {outputDevices.length > 0 && (
+              ) : (
                 <>
-                  <Text
-                    style={[styles.sectionTitle, styles.sectionTitleSecond]}
-                  >
-                    Select speakers
-                  </Text>
-                  {outputDevices.map(device => (
+                  {/* Combined list of all audio devices */}
+                  <Text style={styles.sectionTitle}>Select microphone</Text>
+                  {audioDevices.map(device => (
                     <TouchableOpacity
                       key={device.deviceId}
                       style={[
                         styles.deviceItem,
-                        selectedOutputDevice === device.deviceId &&
+                        ((device.kind === "audioinput" &&
+                          selectedInputDevice === device.deviceId) ||
+                          (device.kind === "audiooutput" &&
+                            selectedOutputDevice === device.deviceId)) &&
                           styles.selectedDevice,
                       ]}
                       onPress={() =>
-                        handleDeviceSelect(device.deviceId, "audiooutput")
+                        handleDeviceSelect(device.deviceId, device.kind)
                       }
                     >
-                      <Text style={styles.deviceLabel}>{device.label}</Text>
-                      {selectedOutputDevice === device.deviceId && (
+                      <Text style={styles.deviceLabel}>
+                        {device.label} (
+                        {device.kind === "audioinput" ? "Input" : "Output"})
+                      </Text>
+                      {((device.kind === "audioinput" &&
+                        selectedInputDevice === device.deviceId) ||
+                        (device.kind === "audiooutput" &&
+                          selectedOutputDevice === device.deviceId)) && (
                         <Text style={styles.checkmark}>✓</Text>
                       )}
                     </TouchableOpacity>
