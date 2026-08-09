@@ -26,23 +26,28 @@ interface AudioDevice {
 
 interface MicrophoneControlProps {
   isMuted: boolean
-  onToggleMute: () => void
+  onToggleMute: VoidFunction
+  isDropdownVisible: boolean
+  onToggleDropdown: VoidFunction
+  onCloseDropdown: VoidFunction
 }
 
 export const MicrophoneControl = ({
   isMuted,
   onToggleMute,
+  isDropdownVisible,
+  onToggleDropdown,
+  onCloseDropdown,
 }: MicrophoneControlProps) => {
   const room = useRoomContext()
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false)
   const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([])
   const [selectedInputDevice, setSelectedInputDevice] = useState<string>("")
   const [selectedOutputDevice, setSelectedOutputDevice] = useState<string>("")
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {
-    setIsDropdownVisible(false)
-  }, [])
+    onCloseDropdown()
+  }, [onCloseDropdown])
 
   // Get the list of audio devices
   const loadAudioDevices = useCallback(async () => {
@@ -88,13 +93,13 @@ export const MicrophoneControl = ({
           setSelectedOutputDevice(deviceId)
         }
 
-        setIsDropdownVisible(false)
+        onCloseDropdown()
       } catch (error) {
         console.error("Error switching audio device: ", error)
         Alert.alert("Error", "Failed to switch audio device")
       }
     },
-    [room],
+    [room, onCloseDropdown],
   )
 
   const inputDevices = audioDevices.filter(
@@ -120,7 +125,7 @@ export const MicrophoneControl = ({
         {/* Dropdown list button */}
         <TouchableOpacity
           style={styles.dropdownButton}
-          onPress={() => setIsDropdownVisible(!isDropdownVisible)}
+          onPress={onToggleDropdown}
           accessibilityLabel="Select audio device"
         >
           <Text

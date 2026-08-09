@@ -1,7 +1,8 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, useState } from "react"
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native"
 
 import { useLocalParticipant, useRoomContext } from "@livekit/react-native"
+import { Track } from "livekit-client"
 
 import { DisconnectIcon } from "@/components/icons"
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
@@ -9,12 +10,23 @@ import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 import { CameraControl } from "./controls/CameraControl"
 import { MicrophoneControl } from "./controls/MicrophoneControl"
 
+type DeviceDropdownSource = Track.Source.Camera | Track.Source.Microphone
+
 export const ControlBar = () => {
   const room = useRoomContext()
   const { localParticipant, isCameraEnabled, isMicrophoneEnabled } =
     useLocalParticipant()
   const isTogglingMicrophone = useRef<boolean>(false)
   const isTogglingCamera = useRef<boolean>(false)
+  const [openDeviceDropdown, setOpenDeviceDropdown] =
+    useState<DeviceDropdownSource | null>(null)
+
+  const toggleDeviceDropdown = useCallback(
+    (source: DeviceDropdownSource): void => {
+      setOpenDeviceDropdown(current => (current === source ? null : source))
+    },
+    [],
+  )
 
   const toggleMute = useCallback(async (): Promise<void> => {
     if (isTogglingMicrophone.current) return
@@ -62,12 +74,18 @@ export const ControlBar = () => {
       <MicrophoneControl
         isMuted={!isMicrophoneEnabled}
         onToggleMute={toggleMute}
+        isDropdownVisible={openDeviceDropdown === Track.Source.Microphone}
+        onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Microphone)}
+        onCloseDropdown={() => setOpenDeviceDropdown(null)}
       />
 
       {/* Camera control component with a dropdown list */}
       <CameraControl
         isVideoEnabled={isCameraEnabled}
         onToggleVideo={toggleVideo}
+        isDropdownVisible={openDeviceDropdown === Track.Source.Camera}
+        onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Camera)}
+        onCloseDropdown={() => setOpenDeviceDropdown(null)}
       />
 
       {/* Disconnect button */}
