@@ -6,6 +6,7 @@
     "lib": ["es2022", "dom"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "types": ["node"],
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
@@ -20,7 +21,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "verbatimModuleSyntax": false,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
       "@components/*": ["./components/*"],

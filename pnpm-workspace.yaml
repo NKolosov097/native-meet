@@ -1,0 +1,12 @@
+allowBuilds:
+  unrs-resolver: true
+auditConfig:
+  ignoreGhsas:
+    - GHSA-5p2g-fcmc-qvqq
+    - GHSA-w3rx-r6r6-pgpr
+overrides:
+  uuid: 11.1.1
+patchedDependencies:
+  image-size@1.2.1: patches/image-size@1.2.1.patch
+nodeLinker: hoisted
+packageImportMethod: copy
