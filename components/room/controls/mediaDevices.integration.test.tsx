@@ -184,6 +184,12 @@ test("uses fallback labels with combined audio device suffixes", async () => {
 })
 
 test("initializes missing audio and camera devices with the first matching device", async () => {
+  getActiveDevice.mockImplementation(kind => {
+    if (kind === "audioinput") return "missing-mic"
+    if (kind === "videoinput") return "missing-camera"
+
+    return undefined
+  })
   const microphone = await render(<MicrophoneControl {...microphoneProps()} />)
   await waitForText(microphone, "Desk microphone")
 
