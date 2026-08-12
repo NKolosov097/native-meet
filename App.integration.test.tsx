@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { PropsWithChildren } from "react"
 
 import {
   fireEvent,
@@ -7,20 +7,11 @@ import {
   waitFor,
 } from "@testing-library/react-native"
 
-import type { RoomConnectOptions, RoomOptions } from "livekit-client"
+import type { LiveKitRoomProps } from "@livekit/react-native"
 
 import App from "./App"
 
-type LiveKitRoomBoundaryProps = {
-  children?: ReactNode
-  connect?: boolean
-  connectOptions?: RoomConnectOptions
-  onDisconnected?: () => void
-  onError?: (error?: Error) => void
-  options?: RoomOptions
-  serverUrl?: string
-  token?: string
-}
+type LiveKitRoomBoundaryProps = PropsWithChildren<LiveKitRoomProps>
 
 let mockLatestLiveKitProps: LiveKitRoomBoundaryProps | undefined
 
@@ -71,7 +62,7 @@ jest.mock("@livekit/react-native", () => {
         React.createElement(Button, {
           title: "Trigger fallback room error",
           accessibilityLabel: "Trigger fallback room error",
-          onPress: () => props.onError?.(),
+          onPress: () => props.onError?.(undefined as never),
         }),
       )
     },
@@ -135,8 +126,12 @@ test("returns to joining without an error after disconnecting", async () => {
 
   await waitFor(() => {
     expect(screen.getByLabelText("Participant name")).toBeVisible()
+    expect(screen.getByLabelText("Join room")).toBeVisible()
   })
   expect(screen.queryByText("room unavailable")).not.toBeOnTheScreen()
+  expect(
+    screen.queryByText("Failed to connect to the room"),
+  ).not.toBeOnTheScreen()
 })
 
 test("shows a room connection error after LiveKit reports one", async () => {
@@ -146,6 +141,10 @@ test("shows a room connection error after LiveKit reports one", async () => {
   await joinRoom()
   await fireEvent.press(screen.getByLabelText("Trigger room error"))
 
+  await waitFor(() => {
+    expect(screen.getByLabelText("Participant name")).toBeVisible()
+    expect(screen.getByLabelText("Join room")).toBeVisible()
+  })
   expect(await screen.findByText("room unavailable")).toBeVisible()
   expect(consoleError).toHaveBeenCalledWith(
     "Connection error: ",
@@ -161,6 +160,10 @@ test("shows a fallback error when LiveKit reports no error details", async () =>
   await joinRoom()
   await fireEvent.press(screen.getByLabelText("Trigger fallback room error"))
 
+  await waitFor(() => {
+    expect(screen.getByLabelText("Participant name")).toBeVisible()
+    expect(screen.getByLabelText("Join room")).toBeVisible()
+  })
   expect(await screen.findByText("Failed to connect to the room")).toBeVisible()
   expect(consoleError).toHaveBeenCalledWith("Connection error: ", undefined)
   consoleError.mockRestore()
