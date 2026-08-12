@@ -189,6 +189,20 @@ The project is fully typed with TypeScript:
 - Android Studio (for Android development)
 - Xcode (for iOS development, macOS only)
 
+### Unit tests
+
+Run the Jest unit and component suite:
+
+```bash
+pnpm test
+```
+
+Run the retained dependency-free geometry tests:
+
+```bash
+pnpm test:node
+```
+
 ### Debugging
 
 ```bash
