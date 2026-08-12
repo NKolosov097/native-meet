@@ -4,10 +4,6 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import { ControlBar } from "./ControlBar"
 
-const ControlBarFixture = ({ revision }: { revision: number }) => (
-  <ControlBar key={revision} />
-)
-
 jest.mock("@livekit/react-native", () => ({
   useLocalParticipant: jest.fn(),
   useRoomContext: jest.fn(),
@@ -33,6 +29,8 @@ type PressTarget = {
 }
 
 const pressTwice = async (target: PressTarget): Promise<void> => {
+  // RNTL's public fireEvent.press awaits the async handler, so invoking it
+  // twice cannot exercise two presses in the same pending window.
   await act(async () => {
     if (!target.props.onClick) {
       throw new Error("Accessible control has no onClick handler")
@@ -97,8 +95,8 @@ afterEach(() => {
   jest.restoreAllMocks()
 })
 
-test("passes the opposite microphone and camera states to LiveKit", async () => {
-  const view = await render(<ControlBarFixture revision={1} />)
+test("updates toggle direction after hook state changes on the same ControlBar instance", async () => {
+  const view = await render(<ControlBar />)
 
   await fireEvent.press(view.getByLabelText("Mute microphone"))
   await fireEvent.press(view.getByLabelText("Turn on camera"))
@@ -112,13 +110,7 @@ test("passes the opposite microphone and camera states to LiveKit", async () => 
 
   mockMicrophoneEnabled = false
   mockCameraEnabled = true
-  mockUseLocalParticipant.mockReturnValue({
-    isCameraEnabled: mockCameraEnabled,
-    isMicrophoneEnabled: mockMicrophoneEnabled,
-    localParticipant: mockLocalParticipant,
-  })
-  await view.rerender(<ControlBarFixture revision={2} />)
-  expect(mockUseLocalParticipant).toHaveBeenCalledTimes(2)
+  await view.rerender(<ControlBar />)
 
   await fireEvent.press(view.getByLabelText("Unmute microphone"))
   await fireEvent.press(view.getByLabelText("Turn off camera"))
@@ -148,6 +140,10 @@ test("ignores concurrent microphone toggles until the current toggle finishes", 
     pendingToggle.resolve()
     await pendingToggle.promise
   })
+
+  await fireEvent.press(view.getByLabelText("Mute microphone"))
+
+  expect(mockLocalParticipant.setMicrophoneEnabled).toHaveBeenCalledTimes(2)
 })
 
 test("ignores concurrent camera toggles until the current toggle finishes", async () => {
@@ -163,6 +159,10 @@ test("ignores concurrent camera toggles until the current toggle finishes", asyn
     pendingToggle.resolve()
     await pendingToggle.promise
   })
+
+  await fireEvent.press(view.getByLabelText("Turn on camera"))
+
+  expect(mockLocalParticipant.setCameraEnabled).toHaveBeenCalledTimes(2)
 })
 
 test("alerts when the microphone toggle fails", async () => {

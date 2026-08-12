@@ -129,6 +129,42 @@ test("discovers only cameras in the camera dropdown", async () => {
   expect(view.queryByText("Desk speakers")).not.toBeOnTheScreen()
 })
 
+test("keeps the microphone control stable when device enumeration rejects", async () => {
+  const error = new Error("audio enumeration failed")
+  const consoleError = jest.spyOn(console, "error").mockImplementation()
+  enumerateDevices.mockRejectedValueOnce(error)
+
+  const view = await render(<MicrophoneControl {...microphoneProps()} />)
+
+  await waitFor(() => {
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error loading audio devices: ",
+      error,
+    )
+  })
+  expect(view.getByLabelText("Mute microphone")).toBeVisible()
+  expect(view.getByLabelText("Select audio device")).toBeVisible()
+  expect(view.getByText("No audio devices found")).toBeVisible()
+})
+
+test("keeps the camera control stable when device enumeration rejects", async () => {
+  const error = new Error("camera enumeration failed")
+  const consoleError = jest.spyOn(console, "error").mockImplementation()
+  enumerateDevices.mockRejectedValueOnce(error)
+
+  const view = await render(<CameraControl {...cameraProps()} />)
+
+  await waitFor(() => {
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error loading video devices: ",
+      error,
+    )
+  })
+  expect(view.getByLabelText("Turn off camera")).toBeVisible()
+  expect(view.getByLabelText("Select camera")).toBeVisible()
+  expect(view.getByText("No cameras found")).toBeVisible()
+})
+
 test("shows empty device states", async () => {
   enumeratedDevices = []
   const microphone = await render(<MicrophoneControl {...microphoneProps()} />)
@@ -326,6 +362,39 @@ test("refreshes audio devices and removes the subscribed callback on unmount", a
 
   expect(await waitForText(view, "USB microphone (Input)")).toBeVisible()
   expect(view.queryByText("Desk microphone")).not.toBeOnTheScreen()
+
+  await view.unmount()
+
+  expect(off).toHaveBeenCalledWith(
+    RoomEvent.MediaDevicesChanged,
+    registeredCallback,
+  )
+})
+
+test("refreshes cameras and removes the subscribed callback on unmount", async () => {
+  const view = await render(<CameraControl {...cameraProps()} />)
+
+  expect(await waitForText(view, "Front camera")).toBeVisible()
+  await waitFor(() => {
+    expect(mediaDevicesChangedCallback).toEqual(expect.any(Function))
+  })
+  const registeredCallback = mediaDevicesChangedCallback
+  enumeratedDevices = [
+    {
+      deviceId: "usb-camera-1",
+      groupId: "video",
+      kind: "videoinput",
+      label: "USB camera",
+      toJSON: jest.fn(),
+    },
+  ]
+
+  await act(async () => {
+    await mediaDevicesChangedCallback?.()
+  })
+
+  expect(await waitForText(view, "USB camera")).toBeVisible()
+  expect(view.queryByText("Front camera")).not.toBeOnTheScreen()
 
   await view.unmount()
 

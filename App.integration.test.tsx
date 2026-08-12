@@ -109,11 +109,28 @@ test("joins a room with a trimmed name and configured LiveKit connection", async
     serverUrl: "wss://integration.livekit.cloud",
     token: "token-abc",
     connect: true,
-    connectOptions: { maxRetries: 5 },
-    options: {
-      adaptiveStream: true,
-      dynacast: true,
-      publishDefaults: { simulcast: false },
+  })
+  expect(mockLatestLiveKitProps?.connectOptions).toStrictEqual({
+    maxRetries: 5,
+  })
+  expect(mockLatestLiveKitProps?.options).toStrictEqual({
+    adaptiveStream: true,
+    dynacast: true,
+    videoCaptureDefaults: {
+      resolution: {
+        width: 640,
+        height: 360,
+        frameRate: 20,
+        aspectRatio: 16 / 9,
+      },
+    },
+    publishDefaults: {
+      simulcast: false,
+      videoEncoding: {
+        maxBitrate: 450_000,
+        maxFramerate: 20,
+        priority: undefined,
+      },
     },
   })
 })
