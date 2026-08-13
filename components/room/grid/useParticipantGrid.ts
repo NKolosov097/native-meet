@@ -61,9 +61,15 @@ export const useParticipantGrid = <T,>(
     setCurrentPage(page => Math.min(page, totalPages - 1))
   }, [totalPages])
 
+  // Clamp currentPage synchronously during render to prevent stale page index
+  // when totalPages shrinks. The effect above persists the clamped value to state
+  // for navigation functions; this ensures pageSlice/visibleItems use the
+  // current (post-clamp) page even before the effect runs.
+  const clampedPage = Math.min(currentPage, totalPages - 1)
+
   const pageSlice = useMemo(
-    () => getPageSlice(currentPage, grid.pageSize),
-    [currentPage, grid.pageSize],
+    () => getPageSlice(clampedPage, grid.pageSize),
+    [clampedPage, grid.pageSize],
   )
 
   const visibleItems = useMemo(
@@ -95,11 +101,11 @@ export const useParticipantGrid = <T,>(
     visibleItems,
     tileWidth: tileSize.width,
     tileHeight: tileSize.height,
-    currentPage,
+    currentPage: clampedPage,
     totalPages,
     goToNextPage,
     goToPreviousPage,
-    canGoNext: currentPage < totalPages - 1,
-    canGoPrevious: currentPage > 0,
+    canGoNext: clampedPage < totalPages - 1,
+    canGoPrevious: clampedPage > 0,
   }
 }
