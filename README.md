@@ -18,7 +18,7 @@ A video calling app built with the LiveKit React Native SDK, Expo and TypeScript
 ### 1. Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Set up a LiveKit Cloud project
