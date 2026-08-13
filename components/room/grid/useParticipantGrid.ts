@@ -9,22 +9,41 @@ import {
 } from "./gridLayout"
 
 export interface UseParticipantGridResult<T> {
+  // Attach to the grid container's `onLayout` to measure it.
   onContainerLayout: (event: LayoutChangeEvent) => void
+  // The current page's slice of items.
   visibleItems: T[]
+  // Computed width of one tile, in pixels.
   tileWidth: number
+  // Computed height of one tile, in pixels.
   tileHeight: number
+  // 0-indexed current page.
   currentPage: number
+  // Total number of pages, always at least 1.
   totalPages: number
-  goToNextPage: () => void
-  goToPreviousPage: () => void
+  // Advances to the next page, clamped to the last page.
+  goToNextPage: VoidFunction
+  // Goes back to the previous page, clamped to the first page.
+  goToPreviousPage: VoidFunction
+  // True unless already on the last page.
   canGoNext: boolean
+  // True unless already on the first page.
   canGoPrevious: boolean
 }
+
+interface ContainerSize {
+  width: number
+  height: number
+}
+
+const INITIAL_CONTAINER_SIZE: ContainerSize = { width: 0, height: 0 }
 
 export const useParticipantGrid = <T,>(
   items: T[],
 ): UseParticipantGridResult<T> => {
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+  const [containerSize, setContainerSize] = useState<ContainerSize>(
+    INITIAL_CONTAINER_SIZE,
+  )
   const [currentPage, setCurrentPage] = useState(0)
 
   const onContainerLayout = useCallback((event: LayoutChangeEvent): void => {
