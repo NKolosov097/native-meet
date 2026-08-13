@@ -1,5 +1,7 @@
 export { CameraDisabledIcon } from "./CameraDisabledIcon"
 export { CameraIcon } from "./CameraIcon"
+export { ChevronLeftIcon } from "./ChevronLeftIcon"
+export { ChevronRightIcon } from "./ChevronRightIcon"
 export { DisconnectIcon } from "./DisconnectIcon"
 export { MicDisabledIcon } from "./MicDisabledIcon"
 export { MicIcon } from "./MicIcon"
