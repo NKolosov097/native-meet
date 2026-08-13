@@ -4,7 +4,9 @@ import { StyleSheet, Text, View } from "react-native"
 import { useTracks } from "@livekit/react-native"
 import { ParticipantKind, Track } from "livekit-client"
 
-import { ParticipantTile } from "@/components/participant/ParticipantTile"
+import { PaginationBar } from "@/components/room/grid/PaginationBar"
+import { ParticipantGrid } from "@/components/room/grid/ParticipantGrid"
+import { useParticipantGrid } from "@/components/room/grid/useParticipantGrid"
 import { TEXT_COLORS } from "@/constants/colors"
 
 const tracksOption = [
@@ -28,6 +30,17 @@ export const VideoConference = () => {
     [tracks],
   )
 
+  const {
+    onContainerLayout,
+    visibleItems,
+    tileWidth,
+    tileHeight,
+    currentPage,
+    totalPages,
+    goToNextPage,
+    goToPreviousPage,
+  } = useParticipantGrid(participantTracks)
+
   if (participantTracks.length === 0) {
     return (
       <View style={styles.noVideo}>
@@ -37,18 +50,30 @@ export const VideoConference = () => {
   }
 
   return (
-    <View style={styles.participantsContainer}>
-      {participantTracks.map(track => (
-        <ParticipantTile
-          key={`${track.participant.identity}-${track.source}`}
-          trackRef={track}
+    <View style={styles.container}>
+      <ParticipantGrid
+        tracks={visibleItems}
+        tileWidth={tileWidth}
+        tileHeight={tileHeight}
+        onLayout={onContainerLayout}
+      />
+
+      {totalPages > 1 && (
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={goToPreviousPage}
+          onNext={goToNextPage}
         />
-      ))}
+      )}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   noVideo: {
     flex: 1,
     justifyContent: "center",
@@ -57,11 +82,5 @@ const styles = StyleSheet.create({
   noVideoText: {
     color: TEXT_COLORS.light,
     fontSize: 16,
-  },
-  participantsContainer: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: 10,
   },
 })

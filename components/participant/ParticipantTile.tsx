@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 
 import { BlurView } from "expo-blur"
 
@@ -14,21 +14,25 @@ import { MicDisabledIcon, ParticipantPlaceholderIcon } from "@/components/icons"
 import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
-const { width, height } = Dimensions.get("window")
-
-const TILE_WIDTH = width / 2 - 15
-const TILE_HEIGHT = height / 3
-const PLACEHOLDER_SIZE = Math.min(TILE_WIDTH, TILE_HEIGHT) * 0.5
 const MIC_ICON_SIZE = 16
 const BLUR_INTENSITY = 40
 const BADGE_BACKGROUND = "rgba(0, 0, 0, 0.25)"
 const BADGE_INSET = 4
 
 interface ParticipantTileProps {
+  // The participant's camera/screen-share track, or a placeholder.
   trackRef: TrackReferenceOrPlaceholder
+  // Width of this tile, in pixels, as computed by the grid layout.
+  width: number
+  // Height of this tile, in pixels, as computed by the grid layout.
+  height: number
 }
 
-export const ParticipantTile = ({ trackRef }: ParticipantTileProps) => {
+export const ParticipantTile = ({
+  trackRef,
+  width,
+  height,
+}: ParticipantTileProps) => {
   const { participant } = trackRef
   const { isMuted: isVideoMuted } = useTrackMutedIndicator(trackRef)
   const { isMuted: isMicrophoneMuted } = useTrackMutedIndicator({
@@ -38,6 +42,7 @@ export const ParticipantTile = ({ trackRef }: ParticipantTileProps) => {
 
   const hasVideo =
     isTrackReference(trackRef) && !isVideoMuted && !!trackRef.publication.track
+  const placeholderSize = Math.min(width, height) * 0.5
 
   const badge = (
     <>
@@ -57,7 +62,7 @@ export const ParticipantTile = ({ trackRef }: ParticipantTileProps) => {
   )
 
   return (
-    <View style={styles.participantContainer}>
+    <View style={[styles.participantContainer, { width, height }]}>
       {hasVideo ? (
         <VideoTrack
           style={styles.videoView}
@@ -66,7 +71,7 @@ export const ParticipantTile = ({ trackRef }: ParticipantTileProps) => {
         />
       ) : (
         <View style={styles.placeholderView}>
-          <ParticipantPlaceholderIcon size={PLACEHOLDER_SIZE} />
+          <ParticipantPlaceholderIcon size={placeholderSize} />
         </View>
       )}
 
@@ -90,9 +95,6 @@ export const ParticipantTile = ({ trackRef }: ParticipantTileProps) => {
 
 const styles = StyleSheet.create({
   participantContainer: {
-    width: TILE_WIDTH,
-    height: TILE_HEIGHT,
-    margin: 5,
     backgroundColor: BACKGROUND_COLORS.secondary,
     borderRadius: BORDER_RADIUSES.medium,
     overflow: "hidden",

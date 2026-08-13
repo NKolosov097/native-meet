@@ -1,0 +1,46 @@
+import { StyleSheet, View, type LayoutChangeEvent } from "react-native"
+
+import type { TrackReferenceOrPlaceholder } from "@livekit/react-native"
+
+import { ParticipantTile } from "@/components/participant/ParticipantTile"
+
+import { GRID_GAP, GRID_PADDING } from "./gridLayout"
+
+interface ParticipantGridProps {
+  // The current page's participant/placeholder tracks to render as tiles.
+  tracks: TrackReferenceOrPlaceholder[]
+  // Computed width of one tile, in pixels.
+  tileWidth: number
+  // Computed height of one tile, in pixels.
+  tileHeight: number
+  // Called when the grid container's layout is measured.
+  onLayout: (event: LayoutChangeEvent) => void
+}
+
+export const ParticipantGrid = ({
+  tracks,
+  tileWidth,
+  tileHeight,
+  onLayout,
+}: ParticipantGridProps) => (
+  <View style={styles.container} onLayout={onLayout}>
+    {tracks.map(track => (
+      <ParticipantTile
+        key={`${track.participant.identity}-${track.source}`}
+        trackRef={track}
+        width={tileWidth}
+        height={tileHeight}
+      />
+    ))}
+  </View>
+)
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: GRID_GAP,
+    padding: GRID_PADDING,
+  },
+})
