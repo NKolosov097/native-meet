@@ -69,3 +69,37 @@ test("paginates a nine-person room across two pages", async () => {
 
   expect(view.getByText("1 / 2")).toBeVisible()
 })
+
+test("sizes tiles correctly for a 2x2 grid (three participants)", async () => {
+  mockUseTracks.mockReturnValue(createTracks(3))
+
+  const view = await render(<VideoConference />)
+
+  expect(view.getAllByText(/^Participant \d/)).toHaveLength(3)
+
+  await fireEvent(view.getByTestId("participant-grid"), "layout", {
+    nativeEvent: { layout: { x: 0, y: 0, width: 630, height: 310 } },
+  })
+
+  expect(view.getByTestId("participant-tile-participant-0")).toHaveStyle({
+    width: 300,
+    height: 140,
+  })
+})
+
+test("sizes tiles correctly for a 2x3 grid (five participants)", async () => {
+  mockUseTracks.mockReturnValue(createTracks(5))
+
+  const view = await render(<VideoConference />)
+
+  expect(view.getAllByText(/^Participant \d/)).toHaveLength(5)
+
+  await fireEvent(view.getByTestId("participant-grid"), "layout", {
+    nativeEvent: { layout: { x: 0, y: 0, width: 630, height: 310 } },
+  })
+
+  expect(view.getByTestId("participant-tile-participant-0")).toHaveStyle({
+    width: 300,
+    height: 90,
+  })
+})

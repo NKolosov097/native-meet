@@ -62,7 +62,10 @@ export const ParticipantTile = ({
   )
 
   return (
-    <View style={[styles.participantContainer, { width, height }]}>
+    <View
+      testID={`participant-tile-${participant.identity}`}
+      style={[styles.participantContainer, { width, height }]}
+    >
       {hasVideo ? (
         <VideoTrack
           style={styles.videoView}

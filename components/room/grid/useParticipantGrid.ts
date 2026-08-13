@@ -32,7 +32,9 @@ export interface UseParticipantGridResult<T> {
 }
 
 interface ContainerSize {
+  // Measured width of the grid container, in pixels.
   width: number
+  // Measured height of the grid container, in pixels.
   height: number
 }
 

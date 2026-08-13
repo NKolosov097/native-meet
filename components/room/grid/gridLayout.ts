@@ -4,15 +4,19 @@ export const GRID_GAP = 10
 export const GRID_PADDING = 10
 
 export interface GridDimensions {
+  // Number of tile columns in the grid.
   columns: number
+  // Number of tile rows in the grid.
   rows: number
   // Participants shown per page — always columns * rows.
   pageSize: number
 }
 
-// Maps a participant count to a grid shape per the product's breakpoints:
-// 1 -> 1x1 full screen, 2 -> 1x2 stacked, 3-4 -> 2x2, 5-6 -> 2x3,
-// 7+ -> 2x4 (with 9+ paginated 8-per-page by getTotalPages/getPageSlice).
+// Maps a count of participant/track entries (a screen-sharing participant
+// contributes two entries, one camera and one screen-share) to a grid shape
+// per the product's breakpoints: 1 -> 1x1 full screen, 2 -> 1x2 stacked,
+// 3-4 -> 2x2, 5-6 -> 2x3, 7+ -> 2x4 (with 9+ paginated 8-per-page by
+// getTotalPages/getPageSlice).
 export const getGridDimensions = (participantCount: number): GridDimensions => {
   if (participantCount <= 1) {
     return { columns: 1, rows: 1, pageSize: 1 }
@@ -41,7 +45,9 @@ export const getTotalPages = (
 ): number => Math.max(1, Math.ceil(participantCount / pageSize))
 
 export interface PageSlice {
+  // Index of the first item on the current page, inclusive.
   start: number
+  // Index one past the last item on the current page, exclusive.
   end: number
 }
 
@@ -55,7 +61,9 @@ export const getPageSlice = (
 })
 
 export interface TileSize {
+  // Width of one tile, in pixels.
   width: number
+  // Height of one tile, in pixels.
   height: number
 }
 

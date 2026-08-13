@@ -23,7 +23,7 @@ export const ParticipantGrid = ({
   tileHeight,
   onLayout,
 }: ParticipantGridProps) => (
-  <View style={styles.container} onLayout={onLayout}>
+  <View testID="participant-grid" style={styles.container} onLayout={onLayout}>
     {tracks.map(track => (
       <ParticipantTile
         key={`${track.participant.identity}-${track.source}`}
