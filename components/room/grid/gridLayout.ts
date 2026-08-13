@@ -1,12 +1,18 @@
+// Spacing between adjacent tiles in the grid.
 export const GRID_GAP = 10
+// Spacing between the grid and the edges of its container.
 export const GRID_PADDING = 10
 
 export interface GridDimensions {
   columns: number
   rows: number
+  // Participants shown per page — always columns * rows.
   pageSize: number
 }
 
+// Maps a participant count to a grid shape per the product's breakpoints:
+// 1 -> 1x1 full screen, 2 -> 1x2 stacked, 3-4 -> 2x2, 5-6 -> 2x3,
+// 7+ -> 2x4 (with 9+ paginated 8-per-page by getTotalPages/getPageSlice).
 export const getGridDimensions = (
   participantCount: number,
 ): GridDimensions => {
@@ -29,6 +35,8 @@ export const getGridDimensions = (
   return { columns: 2, rows: 4, pageSize: 8 }
 }
 
+// Number of pages needed to show every participant, always at least 1
+// (so an empty room still has a page to render).
 export const getTotalPages = (
   participantCount: number,
   pageSize: number,
@@ -39,6 +47,7 @@ export interface PageSlice {
   end: number
 }
 
+// Array indices (start inclusive, end exclusive) for the given page.
 export const getPageSlice = (
   currentPage: number,
   pageSize: number,
@@ -52,6 +61,9 @@ export interface TileSize {
   height: number
 }
 
+// Per-tile pixel size that fits `columns` x `rows` tiles, with GRID_GAP
+// between them and GRID_PADDING around the edges, inside a measured
+// container. Clamps to 0 instead of going negative on a tiny container.
 export const getTileSize = (
   containerWidth: number,
   containerHeight: number,
