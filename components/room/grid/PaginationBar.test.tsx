@@ -29,7 +29,7 @@ test("disables the previous button on the first page", async () => {
   const previousButton = view.getByLabelText("Previous page")
   expect(previousButton).toBeDisabled()
 
-  fireEvent.press(previousButton)
+  await fireEvent.press(previousButton)
   expect(onPrevious).not.toHaveBeenCalled()
 })
 
@@ -47,7 +47,7 @@ test("disables the next button on the last page", async () => {
   const nextButton = view.getByLabelText("Next page")
   expect(nextButton).toBeDisabled()
 
-  fireEvent.press(nextButton)
+  await fireEvent.press(nextButton)
   expect(onNext).not.toHaveBeenCalled()
 })
 
@@ -63,8 +63,8 @@ test("calls onPrevious and onNext when the buttons are enabled", async () => {
     />,
   )
 
-  fireEvent.press(view.getByLabelText("Previous page"))
-  fireEvent.press(view.getByLabelText("Next page"))
+  await fireEvent.press(view.getByLabelText("Previous page"))
+  await fireEvent.press(view.getByLabelText("Next page"))
 
   expect(onPrevious).toHaveBeenCalledTimes(1)
   expect(onNext).toHaveBeenCalledTimes(1)
