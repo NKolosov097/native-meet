@@ -27,7 +27,7 @@ export const PaginationBar = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.button, isFirstPage && styles.buttonDisabled]}
+        style={[styles.button, isFirstPage ? styles.buttonDisabled : undefined]}
         onPress={onPrevious}
         disabled={isFirstPage}
         accessibilityLabel="Previous page"
@@ -37,10 +37,12 @@ export const PaginationBar = ({
         />
       </TouchableOpacity>
 
-      <Text style={styles.pageText}>{`${currentPage + 1} / ${totalPages}`}</Text>
+      <Text
+        style={styles.pageText}
+      >{`${currentPage + 1} / ${totalPages}`}</Text>
 
       <TouchableOpacity
-        style={[styles.button, isLastPage && styles.buttonDisabled]}
+        style={[styles.button, isLastPage ? styles.buttonDisabled : undefined]}
         onPress={onNext}
         disabled={isLastPage}
         accessibilityLabel="Next page"

@@ -1,5 +1,6 @@
-import { act, renderHook } from "@testing-library/react-native"
 import type { LayoutChangeEvent } from "react-native"
+
+import { act, renderHook } from "@testing-library/react-native"
 
 import { useParticipantGrid } from "./useParticipantGrid"
 
@@ -12,7 +13,9 @@ const itemsOfLength = (length: number): number[] =>
   Array.from({ length }, (_, index) => index)
 
 test("computes tile size from the measured container for a 2x2 grid", async () => {
-  const { result } = await renderHook(() => useParticipantGrid(itemsOfLength(4)))
+  const { result } = await renderHook(() =>
+    useParticipantGrid(itemsOfLength(4)),
+  )
 
   await act(async () => {
     result.current.onContainerLayout(layoutEvent(650, 330))
@@ -23,7 +26,9 @@ test("computes tile size from the measured container for a 2x2 grid", async () =
 })
 
 test("reports a single page when the count is within the page size", async () => {
-  const { result } = await renderHook(() => useParticipantGrid(itemsOfLength(8)))
+  const { result } = await renderHook(() =>
+    useParticipantGrid(itemsOfLength(8)),
+  )
 
   expect(result.current.totalPages).toBe(1)
   expect(result.current.visibleItems).toEqual(itemsOfLength(8))
@@ -32,7 +37,9 @@ test("reports a single page when the count is within the page size", async () =>
 })
 
 test("paginates nine participants across two pages", async () => {
-  const { result } = await renderHook(() => useParticipantGrid(itemsOfLength(9)))
+  const { result } = await renderHook(() =>
+    useParticipantGrid(itemsOfLength(9)),
+  )
 
   expect(result.current.totalPages).toBe(2)
   expect(result.current.visibleItems).toEqual(itemsOfLength(8))
@@ -55,7 +62,9 @@ test("paginates nine participants across two pages", async () => {
 })
 
 test("does not go before the first page or past the last page", async () => {
-  const { result } = await renderHook(() => useParticipantGrid(itemsOfLength(9)))
+  const { result } = await renderHook(() =>
+    useParticipantGrid(itemsOfLength(9)),
+  )
 
   await act(async () => {
     result.current.goToPreviousPage()

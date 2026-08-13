@@ -38,7 +38,7 @@ interface ContainerSize {
 
 const INITIAL_CONTAINER_SIZE: ContainerSize = { width: 0, height: 0 }
 
-export const useParticipantGrid = <T,>(
+export const useParticipantGrid = <T>(
   items: T[],
 ): UseParticipantGridResult<T> => {
   const [containerSize, setContainerSize] = useState<ContainerSize>(

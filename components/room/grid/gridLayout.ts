@@ -13,9 +13,7 @@ export interface GridDimensions {
 // Maps a participant count to a grid shape per the product's breakpoints:
 // 1 -> 1x1 full screen, 2 -> 1x2 stacked, 3-4 -> 2x2, 5-6 -> 2x3,
 // 7+ -> 2x4 (with 9+ paginated 8-per-page by getTotalPages/getPageSlice).
-export const getGridDimensions = (
-  participantCount: number,
-): GridDimensions => {
+export const getGridDimensions = (participantCount: number): GridDimensions => {
   if (participantCount <= 1) {
     return { columns: 1, rows: 1, pageSize: 1 }
   }
