@@ -22,7 +22,9 @@ import { configError } from "@/constants/env"
 import { fetchParticipantToken } from "@/services/livekitToken"
 
 interface JoinScreenProps {
+  // Message from the most recent failed join/connection attempt, if any
   error?: string
+  // Called with the acquired token once the user successfully joins
   onJoined: (token: string) => void
 }
 

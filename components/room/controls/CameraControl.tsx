@@ -27,16 +27,24 @@ import {
 } from "@/constants/colors"
 
 interface VideoDevice {
+  // Browser-assigned identifier for this device
   deviceId: string
+  // Human-readable device name shown in the dropdown
   label: string
+  // Always "videoinput" — narrows this to a camera device
   kind: "videoinput"
 }
 
 interface CameraControlProps {
+  // Whether the local camera is currently enabled
   isVideoEnabled: boolean
+  // Toggles the local camera on/off
   onToggleVideo: VoidFunction
+  // Whether the camera device dropdown is currently open
   isDropdownVisible: boolean
+  // Opens/closes the camera device dropdown
   onToggleDropdown: VoidFunction
+  // Closes the camera device dropdown
   onCloseDropdown: VoidFunction
 }
 

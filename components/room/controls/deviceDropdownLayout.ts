@@ -2,7 +2,9 @@ export const DEVICE_DROPDOWN_MAX_WIDTH = 300
 export const DEVICE_DROPDOWN_VIEWPORT_MARGIN = 16
 
 interface BoundedDropdownLayout {
+  // Dropdown width, in pixels
   width: number
+  // Dropdown's horizontal offset from its anchor, in pixels
   left: number
 }
 

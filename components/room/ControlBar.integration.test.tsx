@@ -19,7 +19,7 @@ const {
 
 type Deferred = {
   promise: Promise<void>
-  resolve: () => void
+  resolve: VoidFunction
 }
 
 type PressTarget = {

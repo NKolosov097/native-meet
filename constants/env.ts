@@ -1,6 +1,9 @@
 export interface Env {
+  // LiveKit server URL to connect to
   serverUrl: string
+  // LiveKit Cloud sandbox identifier used to mint a token
   sandboxId: string
+  // Name of the room to join
   roomName: string
 }
 

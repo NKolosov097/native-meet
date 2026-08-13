@@ -27,16 +27,24 @@ import {
 } from "@/constants/colors"
 
 interface AudioDevice {
+  // Browser-assigned identifier for this device
   deviceId: string
+  // Human-readable device name shown in the dropdown
   label: string
+  // Whether this is a microphone input or a speaker output
   kind: "audioinput" | "audiooutput"
 }
 
 interface MicrophoneControlProps {
+  // Whether the local microphone is currently muted
   isMuted: boolean
+  // Toggles the local microphone mute state
   onToggleMute: VoidFunction
+  // Whether the microphone device dropdown is currently open
   isDropdownVisible: boolean
+  // Opens/closes the microphone device dropdown
   onToggleDropdown: VoidFunction
+  // Closes the microphone device dropdown
   onCloseDropdown: VoidFunction
 }
 
