@@ -8,6 +8,7 @@ export const BACKGROUND_COLORS = {
   primary: "#007AFF",
   disabled: "#cccccc",
   transparent: "transparent",
+  elevated: "#4A4A4A",
 }
 
 export const TEXT_COLORS = {

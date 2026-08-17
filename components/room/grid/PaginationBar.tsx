@@ -1,4 +1,11 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { useEffect, useRef } from "react"
+import {
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native"
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons"
 import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
@@ -10,11 +17,16 @@ import {
 
 import { GRID_PADDING } from "./gridLayout"
 
+// How long the fade in/out transition takes, in milliseconds.
+export const FADE_DURATION_MS = 200
+
 interface PaginationBarProps {
   // Zero-indexed current page number
   currentPage: number
   // Total number of pages
   totalPages: number
+  // Whether the bar should be shown right now; toggling fades it in/out.
+  isVisible: boolean
   // Callback function to navigate to the previous page
   onPrevious: VoidFunction
   // Callback function to navigate to the next page
@@ -24,17 +36,32 @@ interface PaginationBarProps {
 export const PaginationBar = ({
   currentPage,
   totalPages,
+  isVisible,
   onPrevious,
   onNext,
 }: PaginationBarProps) => {
   const isFirstPage = currentPage === 0
   const isLastPage = currentPage === totalPages - 1
+  const opacity = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    const animation = Animated.timing(opacity, {
+      toValue: isVisible ? 1 : 0,
+      duration: FADE_DURATION_MS,
+      useNativeDriver: false,
+    })
+    animation.start()
+
+    return () => {
+      animation.stop()
+    }
+  }, [isVisible, opacity])
 
   return (
-    <View
+    <Animated.View
       testID="pagination-bar"
-      style={styles.overlay}
-      pointerEvents="box-none"
+      style={[styles.overlay, { opacity }]}
+      pointerEvents={isVisible ? "box-none" : "none"}
     >
       <View style={styles.pill}>
         <TouchableOpacity
@@ -69,7 +96,7 @@ export const PaginationBar = ({
           <ChevronRightIcon color={BACKGROUND_COLORS.primary} />
         </TouchableOpacity>
       </View>
-    </View>
+    </Animated.View>
   )
 }
 
@@ -84,8 +111,10 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: BACKGROUND_COLORS.secondary,
+    backgroundColor: BACKGROUND_COLORS.elevated,
     borderRadius: BORDER_RADIUSES.medium,
+    borderWidth: 1,
+    borderColor: BORDER_COLORS.divider,
     overflow: "hidden",
   },
   button: {

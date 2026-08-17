@@ -1,12 +1,35 @@
-import { fireEvent, render } from "@testing-library/react-native"
+import { act, fireEvent, render } from "@testing-library/react-native"
 
-import { PaginationBar } from "./PaginationBar"
+import { FADE_DURATION_MS, PaginationBar } from "./PaginationBar"
+
+beforeEach(() => {
+  jest.useFakeTimers()
+})
+
+afterEach(() => {
+  jest.useRealTimers()
+})
+
+// Renders and lets the mount's fade-in animation finish, so subsequent
+// assertions and unmount-time cleanup don't race a pending animation frame.
+const renderSettled = async (
+  ui: Parameters<typeof render>[0],
+): Promise<ReturnType<typeof render>> => {
+  const view = await render(ui)
+
+  await act(async () => {
+    jest.advanceTimersByTime(FADE_DURATION_MS)
+  })
+
+  return view
+}
 
 test("shows the current page out of the total", async () => {
-  const view = await render(
+  const view = await renderSettled(
     <PaginationBar
       currentPage={1}
       totalPages={3}
+      isVisible
       onPrevious={jest.fn()}
       onNext={jest.fn()}
     />,
@@ -17,10 +40,11 @@ test("shows the current page out of the total", async () => {
 
 test("disables the previous button on the first page", async () => {
   const onPrevious = jest.fn()
-  const view = await render(
+  const view = await renderSettled(
     <PaginationBar
       currentPage={0}
       totalPages={3}
+      isVisible
       onPrevious={onPrevious}
       onNext={jest.fn()}
     />,
@@ -35,10 +59,11 @@ test("disables the previous button on the first page", async () => {
 
 test("disables the next button on the last page", async () => {
   const onNext = jest.fn()
-  const view = await render(
+  const view = await renderSettled(
     <PaginationBar
       currentPage={2}
       totalPages={3}
+      isVisible
       onPrevious={jest.fn()}
       onNext={onNext}
     />,
@@ -54,10 +79,11 @@ test("disables the next button on the last page", async () => {
 test("calls onPrevious and onNext when the buttons are enabled", async () => {
   const onPrevious = jest.fn()
   const onNext = jest.fn()
-  const view = await render(
+  const view = await renderSettled(
     <PaginationBar
       currentPage={1}
       totalPages={3}
+      isVisible
       onPrevious={onPrevious}
       onNext={onNext}
     />,
@@ -71,10 +97,11 @@ test("calls onPrevious and onNext when the buttons are enabled", async () => {
 })
 
 test("renders as an absolutely-positioned overlay so it never affects the grid's layout", async () => {
-  const view = await render(
+  const view = await renderSettled(
     <PaginationBar
       currentPage={0}
       totalPages={2}
+      isVisible
       onPrevious={jest.fn()}
       onNext={jest.fn()}
     />,
@@ -83,4 +110,64 @@ test("renders as an absolutely-positioned overlay so it never affects the grid's
   expect(view.getByTestId("pagination-bar")).toHaveStyle({
     position: "absolute",
   })
+})
+
+test("allows touches to pass through to the grid while faded out", async () => {
+  const view = await renderSettled(
+    <PaginationBar
+      currentPage={0}
+      totalPages={2}
+      isVisible={false}
+      onPrevious={jest.fn()}
+      onNext={jest.fn()}
+    />,
+  )
+
+  expect(view.getByTestId("pagination-bar").props.pointerEvents).toBe("none")
+})
+
+test("keeps its buttons tappable while visible", async () => {
+  const view = await renderSettled(
+    <PaginationBar
+      currentPage={0}
+      totalPages={2}
+      isVisible
+      onPrevious={jest.fn()}
+      onNext={jest.fn()}
+    />,
+  )
+
+  expect(view.getByTestId("pagination-bar").props.pointerEvents).toBe(
+    "box-none",
+  )
+})
+
+test("fades in when shown and fades out when hidden", async () => {
+  const view = await renderSettled(
+    <PaginationBar
+      currentPage={0}
+      totalPages={2}
+      isVisible
+      onPrevious={jest.fn()}
+      onNext={jest.fn()}
+    />,
+  )
+
+  expect(view.getByTestId("pagination-bar")).toHaveStyle({ opacity: 1 })
+
+  await view.rerender(
+    <PaginationBar
+      currentPage={0}
+      totalPages={2}
+      isVisible={false}
+      onPrevious={jest.fn()}
+      onNext={jest.fn()}
+    />,
+  )
+
+  await act(async () => {
+    jest.advanceTimersByTime(FADE_DURATION_MS)
+  })
+
+  expect(view.getByTestId("pagination-bar")).toHaveStyle({ opacity: 0 })
 })

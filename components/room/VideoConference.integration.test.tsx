@@ -1,6 +1,8 @@
-import { fireEvent, render } from "@testing-library/react-native"
+import { act, fireEvent, render } from "@testing-library/react-native"
 
 import { ParticipantKind, Track } from "livekit-client"
+
+import { FADE_DURATION_MS } from "@/components/room/grid/PaginationBar"
 
 import { VideoConference } from "./VideoConference"
 
@@ -29,6 +31,11 @@ const createTracks = (count: number) =>
 
 beforeEach(() => {
   jest.clearAllMocks()
+  jest.useFakeTimers()
+})
+
+afterEach(() => {
+  jest.useRealTimers()
 })
 
 test("shows a message when the room is empty", async () => {
@@ -52,6 +59,10 @@ test("paginates a nine-person room across two pages", async () => {
   mockUseTracks.mockReturnValue(createTracks(9))
 
   const view = await render(<VideoConference />)
+
+  await act(async () => {
+    jest.advanceTimersByTime(FADE_DURATION_MS)
+  })
 
   expect(view.getAllByText(/^Participant \d/)).toHaveLength(8)
   expect(view.getByText("1 / 2")).toBeVisible()

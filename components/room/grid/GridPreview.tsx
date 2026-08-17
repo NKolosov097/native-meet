@@ -77,10 +77,11 @@ export const GridPreview = () => {
           </View>
         </View>
 
-        {totalPages > 1 && isPaginationVisible && (
+        {totalPages > 1 && (
           <PaginationBar
             currentPage={currentPage}
             totalPages={totalPages}
+            isVisible={isPaginationVisible}
             onPrevious={goToPreviousPage}
             onNext={goToNextPage}
           />
