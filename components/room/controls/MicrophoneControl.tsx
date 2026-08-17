@@ -54,8 +54,12 @@ export const MicrophoneControl = ({
     Track.Source.Microphone,
   )
   const [selectedOutputDevice, setSelectedOutputDevice] = useState<string>("")
-  const { containerRef, onContainerLayout, dropdownPositionStyle, overlayStyle } =
-    useBoundedDeviceDropdownLayout(isDropdownVisible)
+  const {
+    containerRef,
+    onContainerLayout,
+    dropdownPositionStyle,
+    overlayStyle,
+  } = useBoundedDeviceDropdownLayout(isDropdownVisible)
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {

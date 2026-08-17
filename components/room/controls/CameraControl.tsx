@@ -50,8 +50,12 @@ export const CameraControl = ({
   const room = useRoomContext()
   const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([])
   const selectedVideoDevice = useActiveMediaDevice(room, Track.Source.Camera)
-  const { containerRef, onContainerLayout, dropdownPositionStyle, overlayStyle } =
-    useBoundedDeviceDropdownLayout(isDropdownVisible)
+  const {
+    containerRef,
+    onContainerLayout,
+    dropdownPositionStyle,
+    overlayStyle,
+  } = useBoundedDeviceDropdownLayout(isDropdownVisible)
 
   // Close the dropdown list on a click outside its area
   const handleOutsidePress = useCallback(() => {

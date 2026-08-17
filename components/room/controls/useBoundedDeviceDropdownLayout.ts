@@ -12,11 +12,14 @@ import {
 } from "./deviceDropdownLayout"
 
 export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
-  const { width: viewportWidth, height: viewportHeight } =
-    useWindowDimensions()
+  const { width: viewportWidth, height: viewportHeight } = useWindowDimensions()
   const containerRef = useRef<View>(null)
   const [containerX, setContainerX] = useState(0)
   const [containerY, setContainerY] = useState(0)
+  const [containerOffsetInParent, setContainerOffsetInParent] = useState({
+    x: 0,
+    y: 0,
+  })
 
   const measureContainer = useCallback((): void => {
     containerRef.current?.measureInWindow((x, y) => {
@@ -26,7 +29,9 @@ export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
   }, [])
 
   const onContainerLayout = useCallback(
-    (_event: LayoutChangeEvent): void => {
+    (event: LayoutChangeEvent): void => {
+      const { x, y } = event.nativeEvent.layout
+      setContainerOffsetInParent({ x, y })
       measureContainer()
     },
     [measureContainer],
@@ -48,10 +53,16 @@ export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
       calculateOverlayCoverStyle(
         viewportWidth,
         viewportHeight,
-        containerX,
-        containerY,
+        containerX - containerOffsetInParent.x,
+        containerY - containerOffsetInParent.y,
       ),
-    [viewportWidth, viewportHeight, containerX, containerY],
+    [
+      viewportWidth,
+      viewportHeight,
+      containerX,
+      containerY,
+      containerOffsetInParent,
+    ],
   )
 
   return {
