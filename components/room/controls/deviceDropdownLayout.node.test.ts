@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { calculateBoundedDropdownLayout } from "./deviceDropdownLayout.ts"
+import {
+  calculateBoundedDropdownLayout,
+  calculateOverlayCoverStyle,
+} from "./deviceDropdownLayout.ts"
 
 test("keeps the audio dropdown within a 320px viewport", () => {
   assert.deepEqual(calculateBoundedDropdownLayout(320, 40), {
@@ -35,5 +38,32 @@ test("returns valid non-negative geometry for an extremely narrow viewport", () 
   assert.deepEqual(calculateBoundedDropdownLayout(20, 4), {
     width: 0,
     left: 6,
+  })
+})
+
+test("covers the full viewport when the anchor sits at the origin", () => {
+  assert.deepEqual(calculateOverlayCoverStyle(320, 640, 0, 0), {
+    top: 0,
+    left: 0,
+    width: 320,
+    height: 640,
+  })
+})
+
+test("offsets the overlay to reach the viewport edges from a non-zero anchor", () => {
+  assert.deepEqual(calculateOverlayCoverStyle(320, 640, 40, 580), {
+    top: -580,
+    left: -40,
+    width: 320,
+    height: 640,
+  })
+})
+
+test("clamps negative viewport dimensions to zero", () => {
+  assert.deepEqual(calculateOverlayCoverStyle(-10, -20, 5, 5), {
+    top: -5,
+    left: -5,
+    width: 0,
+    height: 0,
   })
 })
