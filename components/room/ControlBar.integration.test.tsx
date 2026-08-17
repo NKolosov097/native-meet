@@ -203,14 +203,42 @@ test("alerts when the camera toggle fails", async () => {
   })
 })
 
-test("disconnects the room", async () => {
+test("shows a confirmation modal instead of disconnecting immediately", async () => {
   const view = await render(<ControlBar />)
 
   await fireEvent.press(view.getByLabelText("Disconnect from room"))
 
+  expect(view.getByText("Disconnect?")).toBeVisible()
+  expect(mockRoom.disconnect).not.toHaveBeenCalled()
+})
+
+test("disconnects the room after confirming", async () => {
+  const view = await render(<ControlBar />)
+
+  await fireEvent.press(view.getByLabelText("Disconnect from room"))
+  await fireEvent.press(view.getByLabelText("Confirm disconnect"))
+
   await waitFor(() => {
     expect(mockRoom.disconnect).toHaveBeenCalledTimes(1)
   })
+})
+
+test("does not disconnect when the confirmation is canceled", async () => {
+  const view = await render(<ControlBar />)
+
+  await fireEvent.press(view.getByLabelText("Disconnect from room"))
+  await fireEvent.press(view.getByLabelText("Cancel"))
+
+  expect(mockRoom.disconnect).not.toHaveBeenCalled()
+})
+
+test("does not disconnect when tapping outside the confirmation", async () => {
+  const view = await render(<ControlBar />)
+
+  await fireEvent.press(view.getByLabelText("Disconnect from room"))
+  await fireEvent.press(view.getByLabelText("Close disconnect confirmation"))
+
+  expect(mockRoom.disconnect).not.toHaveBeenCalled()
 })
 
 test("keeps controls available after a disconnect failure", async () => {
@@ -220,6 +248,7 @@ test("keeps controls available after a disconnect failure", async () => {
   const view = await render(<ControlBar />)
 
   await fireEvent.press(view.getByLabelText("Disconnect from room"))
+  await fireEvent.press(view.getByLabelText("Confirm disconnect"))
 
   await waitFor(() => {
     expect(consoleError).toHaveBeenCalledWith("Error disconnecting: ", error)

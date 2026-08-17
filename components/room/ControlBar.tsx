@@ -8,6 +8,7 @@ import { DisconnectIcon } from "@/components/icons"
 import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import { BACKGROUND_COLORS, TEXT_COLORS } from "@/constants/colors"
 
+import { ConfirmDisconnectModal } from "./ConfirmDisconnectModal"
 import { CameraControl } from "./controls/CameraControl"
 import { MicrophoneControl } from "./controls/MicrophoneControl"
 
@@ -21,6 +22,7 @@ export const ControlBar = () => {
   const isTogglingCamera = useRef<boolean>(false)
   const [openDeviceDropdown, setOpenDeviceDropdown] =
     useState<DeviceDropdownSource | null>(null)
+  const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false)
 
   const toggleDeviceDropdown = useCallback(
     (source: DeviceDropdownSource): void => {
@@ -59,6 +61,14 @@ export const ControlBar = () => {
     }
   }, [localParticipant, isCameraEnabled])
 
+  const requestDisconnect = useCallback((): void => {
+    setIsConfirmingDisconnect(true)
+  }, [])
+
+  const cancelDisconnect = useCallback((): void => {
+    setIsConfirmingDisconnect(false)
+  }, [])
+
   const disconnect = useCallback(async (): Promise<void> => {
     if (!room) return
 
@@ -66,38 +76,50 @@ export const ControlBar = () => {
       await room.disconnect()
     } catch (error) {
       console.error("Error disconnecting: ", error)
+    } finally {
+      setIsConfirmingDisconnect(false)
     }
   }, [room])
 
   return (
-    <View style={styles.controlsContainer}>
-      {/* Microphone control component with a dropdown list */}
-      <MicrophoneControl
-        isMuted={!isMicrophoneEnabled}
-        onToggleMute={toggleMute}
-        isDropdownVisible={openDeviceDropdown === Track.Source.Microphone}
-        onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Microphone)}
-        onCloseDropdown={() => setOpenDeviceDropdown(null)}
-      />
+    <>
+      <View style={styles.controlsContainer}>
+        {/* Microphone control component with a dropdown list */}
+        <MicrophoneControl
+          isMuted={!isMicrophoneEnabled}
+          onToggleMute={toggleMute}
+          isDropdownVisible={openDeviceDropdown === Track.Source.Microphone}
+          onToggleDropdown={() =>
+            toggleDeviceDropdown(Track.Source.Microphone)
+          }
+          onCloseDropdown={() => setOpenDeviceDropdown(null)}
+        />
 
-      {/* Camera control component with a dropdown list */}
-      <CameraControl
-        isVideoEnabled={isCameraEnabled}
-        onToggleVideo={toggleVideo}
-        isDropdownVisible={openDeviceDropdown === Track.Source.Camera}
-        onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Camera)}
-        onCloseDropdown={() => setOpenDeviceDropdown(null)}
-      />
+        {/* Camera control component with a dropdown list */}
+        <CameraControl
+          isVideoEnabled={isCameraEnabled}
+          onToggleVideo={toggleVideo}
+          isDropdownVisible={openDeviceDropdown === Track.Source.Camera}
+          onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Camera)}
+          onCloseDropdown={() => setOpenDeviceDropdown(null)}
+        />
 
-      {/* Disconnect button */}
-      <TouchableOpacity
-        style={[styles.controlButton, styles.disconnectButton]}
-        onPress={disconnect}
-        accessibilityLabel="Disconnect from room"
-      >
-        <DisconnectIcon />
-      </TouchableOpacity>
-    </View>
+        {/* Disconnect button */}
+        <TouchableOpacity
+          style={[styles.controlButton, styles.disconnectButton]}
+          onPress={requestDisconnect}
+          accessibilityLabel="Disconnect from room"
+        >
+          <DisconnectIcon />
+        </TouchableOpacity>
+      </View>
+
+      <ConfirmDisconnectModal
+        visible={isConfirmingDisconnect}
+        onConfirm={disconnect}
+        onCancel={cancelDisconnect}
+      />
+    </>
   )
 }
 
