@@ -22,6 +22,7 @@ export const BORDER_COLORS = {
   secondary: "#ddd",
   lightBorder: "#ddd",
   danger: "#f44336",
+  divider: "rgba(255, 255, 255, 0.15)",
 }
 
 export const SHADOW_COLORS = {

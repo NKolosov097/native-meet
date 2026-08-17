@@ -69,3 +69,18 @@ test("calls onPrevious and onNext when the buttons are enabled", async () => {
   expect(onPrevious).toHaveBeenCalledTimes(1)
   expect(onNext).toHaveBeenCalledTimes(1)
 })
+
+test("renders as an absolutely-positioned overlay so it never affects the grid's layout", async () => {
+  const view = await render(
+    <PaginationBar
+      currentPage={0}
+      totalPages={2}
+      onPrevious={jest.fn()}
+      onNext={jest.fn()}
+    />,
+  )
+
+  expect(view.getByTestId("pagination-bar")).toHaveStyle({
+    position: "absolute",
+  })
+})
