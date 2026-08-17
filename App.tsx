@@ -11,10 +11,13 @@ import {
 } from "livekit-client"
 
 import { ActiveRoom } from "@/components/room/ActiveRoom"
+import { GridPreview } from "@/components/room/grid/GridPreview"
 import { env } from "@/constants/env"
 import { JoinScreen } from "@/screens/JoinScreen"
 
 import type { ConnectionState } from "@/types"
+
+const isGridPreview = process.env.EXPO_PUBLIC_GRID_PREVIEW === "1"
 
 const initialConnectionState: ConnectionState = {
   token: null,
@@ -65,6 +68,14 @@ export default () => {
       error: error?.message || "Failed to connect to the room",
     })
   }, [])
+
+  if (isGridPreview) {
+    return (
+      <SafeAreaProvider>
+        <GridPreview />
+      </SafeAreaProvider>
+    )
+  }
 
   return (
     <SafeAreaProvider>
