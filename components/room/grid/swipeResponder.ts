@@ -17,5 +17,6 @@ export const isHorizontalSwipe = (gesture: SwipeGesture): boolean =>
 
 // A leftward swipe (finger moving right-to-left, negative dx) requests the
 // next page; a rightward swipe requests the previous page.
-export const getSwipeDirection = (gesture: SwipeGesture): "next" | "previous" =>
-  gesture.dx < 0 ? "next" : "previous"
+export const getSwipeDirection = (
+  gesture: SwipeGesture,
+): "next" | "previous" => (gesture.dx < 0 ? "next" : "previous")

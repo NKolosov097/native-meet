@@ -28,11 +28,13 @@ export const GridPreview = () => {
 
   const {
     onContainerLayout,
+    panHandlers,
     visibleItems,
     tileWidth,
     tileHeight,
     currentPage,
     totalPages,
+    isPaginationVisible,
     goToNextPage,
     goToPreviousPage,
   } = useParticipantGrid(items)
@@ -58,28 +60,32 @@ export const GridPreview = () => {
         ))}
       </ScrollView>
 
-      <View style={styles.grid} onLayout={onContainerLayout}>
-        {visibleItems.map(index => (
-          <View
-            key={index}
-            style={[styles.tile, { width: tileWidth, height: tileHeight }]}
-          >
-            <Text style={styles.tileText}>
-              {index + 1}
-              {index === 0 ? " (You)" : ""}
-            </Text>
+      <View style={styles.gridWrapper}>
+        <View style={styles.swipeArea} {...panHandlers}>
+          <View style={styles.grid} onLayout={onContainerLayout}>
+            {visibleItems.map(index => (
+              <View
+                key={index}
+                style={[styles.tile, { width: tileWidth, height: tileHeight }]}
+              >
+                <Text style={styles.tileText}>
+                  {index + 1}
+                  {index === 0 ? " (You)" : ""}
+                </Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </View>
 
-      {totalPages > 1 && (
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={goToPreviousPage}
-          onNext={goToNextPage}
-        />
-      )}
+        {totalPages > 1 && isPaginationVisible && (
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={goToPreviousPage}
+            onNext={goToNextPage}
+          />
+        )}
+      </View>
 
       <ControlBarPreview />
     </SafeAreaView>
@@ -111,6 +117,12 @@ const styles = StyleSheet.create({
   presetButtonText: {
     color: TEXT_COLORS.light,
     fontWeight: "600",
+  },
+  gridWrapper: {
+    flex: 1,
+  },
+  swipeArea: {
+    flex: 1,
   },
   grid: {
     flex: 1,
