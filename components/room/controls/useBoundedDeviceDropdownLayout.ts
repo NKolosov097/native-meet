@@ -6,21 +6,32 @@ import {
   type ViewStyle,
 } from "react-native"
 
-import { calculateBoundedDropdownLayout } from "./deviceDropdownLayout"
+import {
+  calculateBoundedDropdownLayout,
+  calculateOverlayCoverStyle,
+} from "./deviceDropdownLayout"
 
 export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
-  const { width: viewportWidth } = useWindowDimensions()
+  const { width: viewportWidth, height: viewportHeight } = useWindowDimensions()
   const containerRef = useRef<View>(null)
   const [containerX, setContainerX] = useState(0)
+  const [containerY, setContainerY] = useState(0)
+  const [containerOffsetInParent, setContainerOffsetInParent] = useState({
+    x: 0,
+    y: 0,
+  })
 
   const measureContainer = useCallback((): void => {
-    containerRef.current?.measureInWindow(x => {
+    containerRef.current?.measureInWindow((x, y) => {
       setContainerX(x)
+      setContainerY(y)
     })
   }, [])
 
   const onContainerLayout = useCallback(
-    (_event: LayoutChangeEvent): void => {
+    (event: LayoutChangeEvent): void => {
+      const { x, y } = event.nativeEvent.layout
+      setContainerOffsetInParent({ x, y })
       measureContainer()
     },
     [measureContainer],
@@ -30,16 +41,34 @@ export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
     if (isDropdownVisible) {
       measureContainer()
     }
-  }, [isDropdownVisible, measureContainer, viewportWidth])
+  }, [isDropdownVisible, measureContainer, viewportWidth, viewportHeight])
 
   const dropdownPositionStyle = useMemo<ViewStyle>(
     () => calculateBoundedDropdownLayout(viewportWidth, containerX),
     [containerX, viewportWidth],
   )
 
+  const overlayStyle = useMemo<ViewStyle>(
+    () =>
+      calculateOverlayCoverStyle(
+        viewportWidth,
+        viewportHeight,
+        containerX - containerOffsetInParent.x,
+        containerY - containerOffsetInParent.y,
+      ),
+    [
+      viewportWidth,
+      viewportHeight,
+      containerX,
+      containerY,
+      containerOffsetInParent,
+    ],
+  )
+
   return {
     containerRef,
     onContainerLayout,
     dropdownPositionStyle,
+    overlayStyle,
   }
 }

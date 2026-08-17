@@ -29,3 +29,26 @@ export const calculateBoundedDropdownLayout = (
     left: Math.min(Math.max(0, minimumLeft), maximumLeft),
   }
 }
+
+export interface OverlayCoverStyle {
+  // Vertical offset from the anchor's top edge needed to reach the viewport's top edge
+  top: number
+  // Horizontal offset from the anchor's left edge needed to reach the viewport's left edge
+  left: number
+  // Overlay width, sized to span the full viewport
+  width: number
+  // Overlay height, sized to span the full viewport
+  height: number
+}
+
+export const calculateOverlayCoverStyle = (
+  viewportWidth: number,
+  viewportHeight: number,
+  anchorX: number,
+  anchorY: number,
+): OverlayCoverStyle => ({
+  top: -anchorY + 0,
+  left: -anchorX + 0,
+  width: Math.max(0, viewportWidth),
+  height: Math.max(0, viewportHeight),
+})

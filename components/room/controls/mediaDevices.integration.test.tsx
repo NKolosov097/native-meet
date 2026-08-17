@@ -403,3 +403,23 @@ test("refreshes cameras and removes the subscribed callback on unmount", async (
     registeredCallback,
   )
 })
+
+test("sizes the microphone device overlay to cover the full window", async () => {
+  const view = await render(<MicrophoneControl {...microphoneProps()} />)
+
+  const overlay = view.getByLabelText("Close device list")
+  const flattenedStyle = Object.assign({}, ...overlay.props.style)
+
+  expect(flattenedStyle.width).toBeGreaterThan(0)
+  expect(flattenedStyle.height).toBeGreaterThan(0)
+})
+
+test("sizes the camera device overlay to cover the full window", async () => {
+  const view = await render(<CameraControl {...cameraProps()} />)
+
+  const overlay = view.getByLabelText("Close camera list")
+  const flattenedStyle = Object.assign({}, ...overlay.props.style)
+
+  expect(flattenedStyle.width).toBeGreaterThan(0)
+  expect(flattenedStyle.height).toBeGreaterThan(0)
+})
