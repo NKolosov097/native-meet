@@ -6,16 +6,22 @@ import {
   type ViewStyle,
 } from "react-native"
 
-import { calculateBoundedDropdownLayout } from "./deviceDropdownLayout"
+import {
+  calculateBoundedDropdownLayout,
+  calculateOverlayCoverStyle,
+} from "./deviceDropdownLayout"
 
 export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
-  const { width: viewportWidth } = useWindowDimensions()
+  const { width: viewportWidth, height: viewportHeight } =
+    useWindowDimensions()
   const containerRef = useRef<View>(null)
   const [containerX, setContainerX] = useState(0)
+  const [containerY, setContainerY] = useState(0)
 
   const measureContainer = useCallback((): void => {
-    containerRef.current?.measureInWindow(x => {
+    containerRef.current?.measureInWindow((x, y) => {
       setContainerX(x)
+      setContainerY(y)
     })
   }, [])
 
@@ -30,16 +36,28 @@ export const useBoundedDeviceDropdownLayout = (isDropdownVisible: boolean) => {
     if (isDropdownVisible) {
       measureContainer()
     }
-  }, [isDropdownVisible, measureContainer, viewportWidth])
+  }, [isDropdownVisible, measureContainer, viewportWidth, viewportHeight])
 
   const dropdownPositionStyle = useMemo<ViewStyle>(
     () => calculateBoundedDropdownLayout(viewportWidth, containerX),
     [containerX, viewportWidth],
   )
 
+  const overlayStyle = useMemo<ViewStyle>(
+    () =>
+      calculateOverlayCoverStyle(
+        viewportWidth,
+        viewportHeight,
+        containerX,
+        containerY,
+      ),
+    [viewportWidth, viewportHeight, containerX, containerY],
+  )
+
   return {
     containerRef,
     onContainerLayout,
     dropdownPositionStyle,
+    overlayStyle,
   }
 }
