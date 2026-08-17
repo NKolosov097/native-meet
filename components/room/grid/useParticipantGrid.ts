@@ -1,5 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import type { LayoutChangeEvent } from "react-native"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  PanResponder,
+  type GestureResponderHandlers,
+  type LayoutChangeEvent,
+} from "react-native"
 
 import {
   getGridDimensions,
@@ -7,10 +11,16 @@ import {
   getTileSize,
   getTotalPages,
 } from "./gridLayout"
+import { getSwipeDirection, isHorizontalSwipe } from "./swipeResponder"
+
+// How long the pagination bar stays visible after being shown, in milliseconds.
+export const AUTO_HIDE_DELAY_MS = 3500
 
 export interface UseParticipantGridResult<T> {
   // Attach to the grid container's `onLayout` to measure it.
   onContainerLayout: (event: LayoutChangeEvent) => void
+  // Gesture handlers enabling horizontal swipe-to-change-page; spread onto the grid container.
+  panHandlers: GestureResponderHandlers
   // The current page's slice of items.
   visibleItems: T[]
   // Computed width of one tile, in pixels.
@@ -21,6 +31,8 @@ export interface UseParticipantGridResult<T> {
   currentPage: number
   // Total number of pages, always at least 1.
   totalPages: number
+  // True while the pagination bar should be shown; auto-hides after AUTO_HIDE_DELAY_MS.
+  isPaginationVisible: boolean
   // Advances to the next page, clamped to the last page.
   goToNextPage: VoidFunction
   // Goes back to the previous page, clamped to the first page.
@@ -47,6 +59,20 @@ export const useParticipantGrid = <T>(
     INITIAL_CONTAINER_SIZE,
   )
   const [currentPage, setCurrentPage] = useState(0)
+  const [isPaginationVisible, setIsPaginationVisible] = useState(true)
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const revealPaginationBar = useCallback((): void => {
+    setIsPaginationVisible(true)
+
+    if (hideTimer.current) {
+      clearTimeout(hideTimer.current)
+    }
+
+    hideTimer.current = setTimeout(() => {
+      setIsPaginationVisible(false)
+    }, AUTO_HIDE_DELAY_MS)
+  }, [])
 
   const onContainerLayout = useCallback((event: LayoutChangeEvent): void => {
     const { width, height } = event.nativeEvent.layout
@@ -58,6 +84,19 @@ export const useParticipantGrid = <T>(
     () => getTotalPages(items.length, grid.pageSize),
     [items.length, grid.pageSize],
   )
+  const hasMultiplePages = totalPages > 1
+
+  useEffect(() => {
+    if (hasMultiplePages) {
+      revealPaginationBar()
+    }
+
+    return () => {
+      if (hideTimer.current) {
+        clearTimeout(hideTimer.current)
+      }
+    }
+  }, [hasMultiplePages, revealPaginationBar])
 
   useEffect(() => {
     setCurrentPage(page => Math.min(page, totalPages - 1))
@@ -92,19 +131,39 @@ export const useParticipantGrid = <T>(
 
   const goToNextPage = useCallback((): void => {
     setCurrentPage(page => Math.min(page + 1, totalPages - 1))
-  }, [totalPages])
+    revealPaginationBar()
+  }, [totalPages, revealPaginationBar])
 
   const goToPreviousPage = useCallback((): void => {
     setCurrentPage(page => Math.max(page - 1, 0))
-  }, [])
+    revealPaginationBar()
+  }, [revealPaginationBar])
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_event, gestureState) =>
+          isHorizontalSwipe(gestureState),
+        onPanResponderRelease: (_event, gestureState) => {
+          if (getSwipeDirection(gestureState) === "next") {
+            goToNextPage()
+          } else {
+            goToPreviousPage()
+          }
+        },
+      }),
+    [goToNextPage, goToPreviousPage],
+  )
 
   return {
     onContainerLayout,
+    panHandlers: panResponder.panHandlers,
     visibleItems,
     tileWidth: tileSize.width,
     tileHeight: tileSize.height,
     currentPage: clampedPage,
     totalPages,
+    isPaginationVisible,
     goToNextPage,
     goToPreviousPage,
     canGoNext: clampedPage < totalPages - 1,

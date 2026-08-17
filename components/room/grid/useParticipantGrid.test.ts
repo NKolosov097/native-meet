@@ -2,7 +2,7 @@ import type { LayoutChangeEvent } from "react-native"
 
 import { act, renderHook } from "@testing-library/react-native"
 
-import { useParticipantGrid } from "./useParticipantGrid"
+import { AUTO_HIDE_DELAY_MS, useParticipantGrid } from "./useParticipantGrid"
 
 const layoutEvent = (width: number, height: number): LayoutChangeEvent =>
   ({
@@ -94,4 +94,104 @@ test("clamps the current page back when the participant count shrinks", async ()
   expect(result.current.totalPages).toBe(1)
   expect(result.current.currentPage).toBe(0)
   expect(result.current.visibleItems).toEqual(itemsOfLength(3))
+})
+
+describe("pagination bar visibility", () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  test("shows the pagination bar as soon as a room needs more than one page", async () => {
+    const { result } = await renderHook(() =>
+      useParticipantGrid(itemsOfLength(9)),
+    )
+
+    expect(result.current.isPaginationVisible).toBe(true)
+  })
+
+  test("never starts an auto-hide timer when everyone fits on one page", async () => {
+    const { result } = await renderHook(() =>
+      useParticipantGrid(itemsOfLength(8)),
+    )
+
+    expect(result.current.totalPages).toBe(1)
+
+    await act(async () => {
+      jest.advanceTimersByTime(AUTO_HIDE_DELAY_MS)
+    })
+
+    expect(result.current.isPaginationVisible).toBe(true)
+  })
+
+  test("hides the pagination bar automatically after the timeout", async () => {
+    const { result } = await renderHook(() =>
+      useParticipantGrid(itemsOfLength(9)),
+    )
+
+    await act(async () => {
+      jest.advanceTimersByTime(AUTO_HIDE_DELAY_MS)
+    })
+
+    expect(result.current.isPaginationVisible).toBe(false)
+  })
+
+  test("keeps the pagination bar visible before the timeout elapses", async () => {
+    const { result } = await renderHook(() =>
+      useParticipantGrid(itemsOfLength(9)),
+    )
+
+    await act(async () => {
+      jest.advanceTimersByTime(AUTO_HIDE_DELAY_MS - 500)
+    })
+
+    expect(result.current.isPaginationVisible).toBe(true)
+  })
+
+  test("re-shows and resets the timer when navigating to another page", async () => {
+    const { result } = await renderHook(() =>
+      useParticipantGrid(itemsOfLength(9)),
+    )
+
+    await act(async () => {
+      jest.advanceTimersByTime(AUTO_HIDE_DELAY_MS - 500)
+    })
+    expect(result.current.isPaginationVisible).toBe(true)
+
+    await act(async () => {
+      result.current.goToNextPage()
+    })
+
+    await act(async () => {
+      jest.advanceTimersByTime(AUTO_HIDE_DELAY_MS - 500)
+    })
+    expect(result.current.isPaginationVisible).toBe(true)
+
+    await act(async () => {
+      jest.advanceTimersByTime(500)
+    })
+    expect(result.current.isPaginationVisible).toBe(false)
+  })
+
+  test("shows the pagination bar even when the navigation attempt is a no-op at a boundary page", async () => {
+    const { result } = await renderHook(() =>
+      useParticipantGrid(itemsOfLength(9)),
+    )
+
+    await act(async () => {
+      jest.advanceTimersByTime(AUTO_HIDE_DELAY_MS)
+    })
+    expect(result.current.isPaginationVisible).toBe(false)
+    expect(result.current.currentPage).toBe(0)
+
+    await act(async () => {
+      result.current.goToPreviousPage()
+    })
+
+    expect(result.current.currentPage).toBe(0)
+    expect(result.current.isPaginationVisible).toBe(true)
+  })
 })
