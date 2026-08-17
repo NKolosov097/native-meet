@@ -89,9 +89,7 @@ export const ControlBar = () => {
           isMuted={!isMicrophoneEnabled}
           onToggleMute={toggleMute}
           isDropdownVisible={openDeviceDropdown === Track.Source.Microphone}
-          onToggleDropdown={() =>
-            toggleDeviceDropdown(Track.Source.Microphone)
-          }
+          onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Microphone)}
           onCloseDropdown={() => setOpenDeviceDropdown(null)}
         />
 

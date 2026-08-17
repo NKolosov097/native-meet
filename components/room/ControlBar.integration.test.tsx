@@ -230,6 +230,7 @@ test("does not disconnect when the confirmation is canceled", async () => {
   await fireEvent.press(view.getByLabelText("Cancel"))
 
   expect(mockRoom.disconnect).not.toHaveBeenCalled()
+  expect(view.queryByText("Disconnect?")).not.toBeOnTheScreen()
 })
 
 test("does not disconnect when tapping outside the confirmation", async () => {
@@ -239,6 +240,7 @@ test("does not disconnect when tapping outside the confirmation", async () => {
   await fireEvent.press(view.getByLabelText("Close disconnect confirmation"))
 
   expect(mockRoom.disconnect).not.toHaveBeenCalled()
+  expect(view.queryByText("Disconnect?")).not.toBeOnTheScreen()
 })
 
 test("keeps controls available after a disconnect failure", async () => {
@@ -253,6 +255,7 @@ test("keeps controls available after a disconnect failure", async () => {
   await waitFor(() => {
     expect(consoleError).toHaveBeenCalledWith("Error disconnecting: ", error)
   })
+  expect(view.queryByText("Disconnect?")).not.toBeOnTheScreen()
   expect(view.getByLabelText("Mute microphone")).toBeVisible()
   expect(view.getByLabelText("Turn on camera")).toBeVisible()
   expect(view.getByLabelText("Disconnect from room")).toBeVisible()

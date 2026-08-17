@@ -16,7 +16,11 @@ test("does not render its content when not visible", async () => {
 
 test("shows the confirmation card when visible", async () => {
   const view = await render(
-    <ConfirmDisconnectModal visible onConfirm={jest.fn()} onCancel={jest.fn()} />,
+    <ConfirmDisconnectModal
+      visible
+      onConfirm={jest.fn()}
+      onCancel={jest.fn()}
+    />,
   )
 
   expect(view.getByText("Disconnect?")).toBeVisible()
@@ -28,7 +32,11 @@ test("calls onConfirm when the Disconnect button is pressed", async () => {
   const onConfirm = jest.fn()
   const onCancel = jest.fn()
   const view = await render(
-    <ConfirmDisconnectModal visible onConfirm={onConfirm} onCancel={onCancel} />,
+    <ConfirmDisconnectModal
+      visible
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />,
   )
 
   await fireEvent.press(view.getByLabelText("Confirm disconnect"))
@@ -41,7 +49,11 @@ test("calls onCancel when the Cancel button is pressed", async () => {
   const onConfirm = jest.fn()
   const onCancel = jest.fn()
   const view = await render(
-    <ConfirmDisconnectModal visible onConfirm={onConfirm} onCancel={onCancel} />,
+    <ConfirmDisconnectModal
+      visible
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />,
   )
 
   await fireEvent.press(view.getByLabelText("Cancel"))
@@ -54,7 +66,11 @@ test("calls onCancel when the backdrop is pressed", async () => {
   const onConfirm = jest.fn()
   const onCancel = jest.fn()
   const view = await render(
-    <ConfirmDisconnectModal visible onConfirm={onConfirm} onCancel={onCancel} />,
+    <ConfirmDisconnectModal
+      visible
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />,
   )
 
   await fireEvent.press(view.getByLabelText("Close disconnect confirmation"))
