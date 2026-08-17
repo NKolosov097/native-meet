@@ -54,7 +54,7 @@ export const MicrophoneControl = ({
     Track.Source.Microphone,
   )
   const [selectedOutputDevice, setSelectedOutputDevice] = useState<string>("")
-  const { containerRef, onContainerLayout, dropdownPositionStyle } =
+  const { containerRef, onContainerLayout, dropdownPositionStyle, overlayStyle } =
     useBoundedDeviceDropdownLayout(isDropdownVisible)
 
   // Close the dropdown list on a click outside its area
@@ -249,7 +249,7 @@ export const MicrophoneControl = ({
       {/* Overlay to close the list on a click outside its area */}
       {isDropdownVisible && (
         <Pressable
-          style={styles.overlay}
+          style={[styles.overlay, overlayStyle]}
           onPress={handleOutsidePress}
           accessibilityLabel="Close device list"
         />
@@ -337,10 +337,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     backgroundColor: BACKGROUND_COLORS.transparent,
     zIndex: 999,
   },

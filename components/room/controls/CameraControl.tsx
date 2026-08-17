@@ -50,7 +50,7 @@ export const CameraControl = ({
   const room = useRoomContext()
   const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([])
   const selectedVideoDevice = useActiveMediaDevice(room, Track.Source.Camera)
-  const { containerRef, onContainerLayout, dropdownPositionStyle } =
+  const { containerRef, onContainerLayout, dropdownPositionStyle, overlayStyle } =
     useBoundedDeviceDropdownLayout(isDropdownVisible)
 
   // Close the dropdown list on a click outside its area
@@ -167,7 +167,7 @@ export const CameraControl = ({
       {/* Overlay to close the list on a click outside its area */}
       {isDropdownVisible && (
         <Pressable
-          style={styles.overlay}
+          style={[styles.overlay, overlayStyle]}
           onPress={handleOutsidePress}
           accessibilityLabel="Close camera list"
         />
@@ -252,10 +252,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     backgroundColor: BACKGROUND_COLORS.transparent,
     zIndex: 998,
   },
