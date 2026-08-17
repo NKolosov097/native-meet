@@ -9,6 +9,7 @@ export const BACKGROUND_COLORS = {
   disabled: "#cccccc",
   transparent: "transparent",
   elevated: "#4A4A4A",
+  overlay: "rgba(0, 0, 0, 0.5)",
 }
 
 export const TEXT_COLORS = {
