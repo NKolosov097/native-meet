@@ -1,4 +1,9 @@
-import { StyleSheet, View, type LayoutChangeEvent } from "react-native"
+import {
+  StyleSheet,
+  View,
+  type GestureResponderHandlers,
+  type LayoutChangeEvent,
+} from "react-native"
 
 import type { TrackReferenceOrPlaceholder } from "@livekit/react-native"
 
@@ -15,6 +20,8 @@ interface ParticipantGridProps {
   tileHeight: number
   // Called when the grid container's layout is measured.
   onLayout: (event: LayoutChangeEvent) => void
+  // Gesture handlers enabling horizontal swipe-to-change-page; spread onto the container.
+  panHandlers: GestureResponderHandlers
 }
 
 export const ParticipantGrid = ({
@@ -22,8 +29,14 @@ export const ParticipantGrid = ({
   tileWidth,
   tileHeight,
   onLayout,
+  panHandlers,
 }: ParticipantGridProps) => (
-  <View testID="participant-grid" style={styles.container} onLayout={onLayout}>
+  <View
+    testID="participant-grid"
+    style={styles.container}
+    onLayout={onLayout}
+    {...panHandlers}
+  >
     {tracks.map(track => (
       <ParticipantTile
         key={`${track.participant.identity}-${track.source}`}
