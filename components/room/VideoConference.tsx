@@ -32,11 +32,13 @@ export const VideoConference = () => {
 
   const {
     onContainerLayout,
+    panHandlers,
     visibleItems,
     tileWidth,
     tileHeight,
     currentPage,
     totalPages,
+    isPaginationVisible,
     goToNextPage,
     goToPreviousPage,
   } = useParticipantGrid(participantTracks)
@@ -56,9 +58,10 @@ export const VideoConference = () => {
         tileWidth={tileWidth}
         tileHeight={tileHeight}
         onLayout={onContainerLayout}
+        panHandlers={panHandlers}
       />
 
-      {totalPages > 1 && (
+      {totalPages > 1 && isPaginationVisible && (
         <PaginationBar
           currentPage={currentPage}
           totalPages={totalPages}

@@ -31,24 +31,28 @@ export const ParticipantGrid = ({
   onLayout,
   panHandlers,
 }: ParticipantGridProps) => (
-  <View
-    testID="participant-grid"
-    style={styles.container}
-    onLayout={onLayout}
-    {...panHandlers}
-  >
-    {tracks.map(track => (
-      <ParticipantTile
-        key={`${track.participant.identity}-${track.source}`}
-        trackRef={track}
-        width={tileWidth}
-        height={tileHeight}
-      />
-    ))}
+  <View style={styles.swipeArea} {...panHandlers}>
+    <View
+      testID="participant-grid"
+      style={styles.container}
+      onLayout={onLayout}
+    >
+      {tracks.map(track => (
+        <ParticipantTile
+          key={`${track.participant.identity}-${track.source}`}
+          trackRef={track}
+          width={tileWidth}
+          height={tileHeight}
+        />
+      ))}
+    </View>
   </View>
 )
 
 const styles = StyleSheet.create({
+  swipeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     flexDirection: "row",
