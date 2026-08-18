@@ -7,9 +7,12 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { BACKGROUND_COLORS } from "@/constants/colors"
 
 import { ControlBar } from "./ControlBar"
+import { useRegisterActiveRoomDisconnect } from "./useRegisterActiveRoomDisconnect"
 import { VideoConference } from "./VideoConference"
 
 export const ActiveRoom = () => {
+  useRegisterActiveRoomDisconnect()
+
   return (
     <SafeAreaView style={styles.roomContainer}>
       <VideoConference />
