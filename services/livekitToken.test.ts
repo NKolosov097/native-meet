@@ -12,7 +12,6 @@ jest.mock("@/constants/env", () => ({
   env: {
     serverUrl: "wss://critical.livekit.cloud",
     sandboxId: "sandbox-critical",
-    roomName: "critical-room",
   },
   configError: null,
 }))
@@ -29,11 +28,13 @@ beforeEach(() => {
   mockGetDeviceIdentity.mockReset()
 })
 
-test("requests and returns a token for the configured room and stable identity", async () => {
+test("requests and returns a token for the given room and stable identity", async () => {
   mockGetDeviceIdentity.mockResolvedValue("device-123")
   mockFetch.mockResolvedValue({ participantToken: "token-abc" })
 
-  await expect(fetchParticipantToken("Ada")).resolves.toBe("token-abc")
+  await expect(
+    fetchParticipantToken("Ada", "critical-room"),
+  ).resolves.toBe("token-abc")
   expect(mockSandboxTokenServer).toHaveBeenCalledWith("sandbox-critical")
   expect(mockFetch).toHaveBeenCalledWith(
     {
@@ -49,9 +50,9 @@ test("rejects an empty token returned by the token server", async () => {
   mockGetDeviceIdentity.mockResolvedValue("device-123")
   mockFetch.mockResolvedValue({ participantToken: "" })
 
-  await expect(fetchParticipantToken("Ada")).rejects.toThrow(
-    "Token server returned an empty access token",
-  )
+  await expect(
+    fetchParticipantToken("Ada", "critical-room"),
+  ).rejects.toThrow("Token server returned an empty access token")
 })
 
 test("preserves token server failures", async () => {
@@ -59,5 +60,7 @@ test("preserves token server failures", async () => {
   mockGetDeviceIdentity.mockResolvedValue("device-123")
   mockFetch.mockRejectedValue(serverFailure)
 
-  await expect(fetchParticipantToken("Ada")).rejects.toBe(serverFailure)
+  await expect(
+    fetchParticipantToken("Ada", "critical-room"),
+  ).rejects.toBe(serverFailure)
 })

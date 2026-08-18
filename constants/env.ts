@@ -3,20 +3,16 @@ export interface Env {
   serverUrl: string
   // LiveKit Cloud sandbox identifier used to mint a token
   sandboxId: string
-  // Name of the room to join
-  roomName: string
 }
 
 const VARIABLE_NAMES: Record<keyof Env, string> = {
   serverUrl: "EXPO_PUBLIC_LIVEKIT_URL",
   sandboxId: "EXPO_PUBLIC_LIVEKIT_SANDBOX_ID",
-  roomName: "EXPO_PUBLIC_LIVEKIT_ROOM",
 }
 
 const rawEnv: Record<keyof Env, string | undefined> = {
   serverUrl: process.env.EXPO_PUBLIC_LIVEKIT_URL,
   sandboxId: process.env.EXPO_PUBLIC_LIVEKIT_SANDBOX_ID,
-  roomName: process.env.EXPO_PUBLIC_LIVEKIT_ROOM,
 }
 
 const missingNames = (Object.keys(VARIABLE_NAMES) as (keyof Env)[])
@@ -31,5 +27,4 @@ export const configError: string | null =
 export const env: Env = {
   serverUrl: rawEnv.serverUrl?.trim() ?? "",
   sandboxId: rawEnv.sandboxId?.trim() ?? "",
-  roomName: rawEnv.roomName?.trim() ?? "",
 }

@@ -7,12 +7,13 @@ const tokenSource = TokenSource.sandboxTokenServer(env.sandboxId)
 
 export const fetchParticipantToken = async (
   participantName: string,
+  roomName: string,
 ): Promise<string> => {
   const participantIdentity = await getDeviceIdentity()
 
   const response = await tokenSource.fetch(
     {
-      roomName: env.roomName,
+      roomName,
       participantName,
       participantIdentity,
     },
