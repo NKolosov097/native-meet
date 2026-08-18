@@ -1,13 +1,9 @@
-import { registerRootComponent } from "expo"
+const { registerGlobals } = require("@livekit/react-native")
 
-import { registerGlobals } from "@livekit/react-native"
-
-import App from "./App"
-
-// Register LiveKit WebRTC globals
+// registerGlobals() must run before expo-router boots the first route, so
+// this uses require() instead of import: ES import statements are hoisted
+// above this file's own statements, which would run expo-router/entry (and
+// start rendering) before LiveKit's WebRTC globals exist.
 registerGlobals()
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(App)
+require("expo-router/entry")
