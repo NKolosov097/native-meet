@@ -63,9 +63,7 @@ test("rejects an empty name without requesting a token", async () => {
 test("trims the participant name and reports a successful join", async () => {
   const onJoined = jest.fn()
   mockFetchParticipantToken.mockResolvedValue("token-abc")
-  await render(
-    <JoinScreen roomSlug="quiet-tiger-42" onJoined={onJoined} />,
-  )
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={onJoined} />)
 
   await fireEvent.changeText(
     screen.getByLabelText("Participant name"),

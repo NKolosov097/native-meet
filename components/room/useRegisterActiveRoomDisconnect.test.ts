@@ -1,5 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native"
 
+import { useRegisterActiveRoomDisconnect } from "./useRegisterActiveRoomDisconnect"
+
 const mockDisconnect = jest.fn()
 const mockRegister = jest.fn()
 
@@ -10,8 +12,6 @@ jest.mock("@livekit/react-native", () => ({
 jest.mock("@/services/activeRoomConnection", () => ({
   registerActiveRoomDisconnect: (...args: unknown[]) => mockRegister(...args),
 }))
-
-import { useRegisterActiveRoomDisconnect } from "./useRegisterActiveRoomDisconnect"
 
 beforeEach(() => {
   mockRegister.mockReset()
