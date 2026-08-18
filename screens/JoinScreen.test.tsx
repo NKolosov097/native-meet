@@ -45,8 +45,14 @@ afterEach(() => {
   jest.restoreAllMocks()
 })
 
+test("shows which room is being joined", async () => {
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={jest.fn()} />)
+
+  expect(screen.getByText(/quiet-tiger-42/)).toBeVisible()
+})
+
 test("rejects an empty name without requesting a token", async () => {
-  await render(<JoinScreen onJoined={jest.fn()} />)
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={jest.fn()} />)
 
   await fireEvent.press(screen.getByLabelText("Join room"))
 
@@ -57,7 +63,9 @@ test("rejects an empty name without requesting a token", async () => {
 test("trims the participant name and reports a successful join", async () => {
   const onJoined = jest.fn()
   mockFetchParticipantToken.mockResolvedValue("token-abc")
-  await render(<JoinScreen onJoined={onJoined} />)
+  await render(
+    <JoinScreen roomSlug="quiet-tiger-42" onJoined={onJoined} />,
+  )
 
   await fireEvent.changeText(
     screen.getByLabelText("Participant name"),
@@ -65,14 +73,17 @@ test("trims the participant name and reports a successful join", async () => {
   )
   await fireEvent.press(screen.getByLabelText("Join room"))
 
-  expect(mockFetchParticipantToken).toHaveBeenCalledWith("Ada")
+  expect(mockFetchParticipantToken).toHaveBeenCalledWith(
+    "Ada",
+    "quiet-tiger-42",
+  )
   expect(onJoined).toHaveBeenCalledWith("token-abc")
 })
 
 test("disables controls while a join request is pending", async () => {
   const request = deferred<string>()
   mockFetchParticipantToken.mockReturnValue(request.promise)
-  await render(<JoinScreen onJoined={jest.fn()} />)
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={jest.fn()} />)
   await fireEvent.changeText(screen.getByLabelText("Participant name"), "Ada")
 
   const pressPromise = fireEvent.press(screen.getByLabelText("Join room"))
@@ -90,7 +101,7 @@ test("disables controls while a join request is pending", async () => {
 test("ignores a duplicate submit while the first request is pending", async () => {
   const request = deferred<string>()
   mockFetchParticipantToken.mockReturnValue(request.promise)
-  await render(<JoinScreen onJoined={jest.fn()} />)
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={jest.fn()} />)
   const nameInput = screen.getByLabelText("Participant name")
   await fireEvent.changeText(nameInput, "Ada")
   const submit = nameInput.props.onSubmitEditing as () => Promise<void>
@@ -107,7 +118,13 @@ test("ignores a duplicate submit while the first request is pending", async () =
 
 test("shows the token service error from the current attempt", async () => {
   mockFetchParticipantToken.mockRejectedValue(new Error("token denied"))
-  await render(<JoinScreen error="connection lost" onJoined={jest.fn()} />)
+  await render(
+    <JoinScreen
+      roomSlug="quiet-tiger-42"
+      error="connection lost"
+      onJoined={jest.fn()}
+    />,
+  )
 
   expect(screen.getByText("connection lost")).toBeVisible()
   await fireEvent.changeText(screen.getByLabelText("Participant name"), "Ada")
@@ -119,7 +136,7 @@ test("shows the token service error from the current attempt", async () => {
 
 test("shows a generic error for a non-Error rejection", async () => {
   mockFetchParticipantToken.mockRejectedValue("token denied")
-  await render(<JoinScreen onJoined={jest.fn()} />)
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={jest.fn()} />)
 
   await fireEvent.changeText(screen.getByLabelText("Participant name"), "Ada")
   await fireEvent.press(screen.getByLabelText("Join room"))
@@ -129,7 +146,7 @@ test("shows a generic error for a non-Error rejection", async () => {
 
 test("disables joining and shows an environment configuration error", async () => {
   mockConfigError = "Missing room configuration"
-  await render(<JoinScreen onJoined={jest.fn()} />)
+  await render(<JoinScreen roomSlug="quiet-tiger-42" onJoined={jest.fn()} />)
 
   expect(screen.getByText("Missing room configuration")).toBeVisible()
   expect(screen.getByLabelText("Join room")).toBeDisabled()

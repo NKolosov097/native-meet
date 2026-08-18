@@ -22,6 +22,8 @@ import { configError } from "@/constants/env"
 import { fetchParticipantToken } from "@/services/livekitToken"
 
 interface JoinScreenProps {
+  // Slug of the room being joined, shown to the participant
+  roomSlug: string
   // Message from the most recent failed join/connection attempt, if any
   error?: string
   // Called with the acquired token once the user successfully joins
@@ -29,7 +31,7 @@ interface JoinScreenProps {
 }
 
 // Login screen: the participant enters a name, the token is requested for them
-export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
+export const JoinScreen = ({ roomSlug, error, onJoined }: JoinScreenProps) => {
   const [name, setName] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
@@ -54,7 +56,7 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
     setTokenError(null)
 
     try {
-      const token = await fetchParticipantToken(participantName)
+      const token = await fetchParticipantToken(participantName, roomSlug)
       onJoined(token)
     } catch (cause) {
       console.error("Failed to get an access token: ", cause)
@@ -67,7 +69,7 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
       setIsLoading(false)
       isJoiningRef.current = false
     }
-  }, [name, onJoined])
+  }, [name, roomSlug, onJoined])
 
   const message =
     configError ?? tokenError ?? (hasStartedJoin ? undefined : error)
@@ -77,6 +79,7 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Native Meet</Text>
+        <Text style={styles.subtitle}>Room: {roomSlug}</Text>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Your name:</Text>
@@ -139,6 +142,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
     color: TEXT_COLORS.light,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+    color: TEXT_COLORS.placeholder,
   },
   inputContainer: {
     marginBottom: 20,
