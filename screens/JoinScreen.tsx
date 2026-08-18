@@ -118,7 +118,7 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
         </TouchableOpacity>
       </View>
 
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </SafeAreaView>
   )
 }

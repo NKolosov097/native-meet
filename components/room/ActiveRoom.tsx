@@ -14,7 +14,7 @@ export const ActiveRoom = () => {
     <SafeAreaView style={styles.roomContainer}>
       <VideoConference />
       <ControlBar />
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
     </SafeAreaView>
   )
 }

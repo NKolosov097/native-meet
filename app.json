@@ -43,6 +43,12 @@
       ],
       "expo-router",
       [
+        "expo-status-bar",
+        {
+          "style": "light"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
