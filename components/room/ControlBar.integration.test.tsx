@@ -210,7 +210,7 @@ test("dims the microphone button when disabled", async () => {
     <MicrophoneControl
       isMuted={false}
       onToggleMute={noop}
-      disabled={true}
+      disabled
       isDropdownVisible={false}
       onToggleDropdown={noop}
       onCloseDropdown={noop}
@@ -312,7 +312,7 @@ test("dims the camera button when disabled", async () => {
     <CameraControl
       isVideoEnabled={false}
       onToggleVideo={noop}
-      disabled={true}
+      disabled
       isDropdownVisible={false}
       onToggleDropdown={noop}
       onCloseDropdown={noop}
