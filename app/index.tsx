@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
+  FlatList,
   StyleSheet,
   Text,
   TextInput,
@@ -20,10 +21,24 @@ import {
 } from "@/constants/colors"
 import { configError } from "@/constants/env"
 import { generateRoomSlug, slugify } from "@/services/roomSlug"
+import { getRecentRooms, type RecentRoom } from "@/services/recentRooms"
 
 export default function HomeScreen() {
   const router = useRouter()
   const [roomCode, setRoomCode] = useState<string>("")
+  const [recentRooms, setRecentRooms] = useState<RecentRoom[]>([])
+
+  useEffect(() => {
+    const loadRecentRooms = async (): Promise<void> => {
+      try {
+        setRecentRooms(await getRecentRooms())
+      } catch (error) {
+        console.error("Error loading recent rooms: ", error)
+      }
+    }
+
+    loadRecentRooms()
+  }, [])
 
   const joinRoom = useCallback(
     (slug: string): void => {
@@ -41,6 +56,20 @@ export default function HomeScreen() {
   const onCreateRoom = useCallback((): void => {
     joinRoom(generateRoomSlug())
   }, [joinRoom])
+
+  const renderRecentRoom = useCallback(
+    ({ item }: { item: RecentRoom }) => (
+      <TouchableOpacity
+        style={styles.recentRoomCard}
+        onPress={() => joinRoom(item.slug)}
+        accessibilityLabel={`Rejoin ${item.slug}`}
+      >
+        <Text style={styles.recentRoomSlug}>{item.slug}</Text>
+        <Text style={styles.recentRoomName}>{item.participantName}</Text>
+      </TouchableOpacity>
+    ),
+    [joinRoom],
+  )
 
   const isDisabled = configError !== null
   const isJoinDisabled = isDisabled || slugify(roomCode) === ""
@@ -98,6 +127,18 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {recentRooms.length > 0 && (
+        <>
+          <Text style={styles.recentRoomsLabel}>Recent meetings</Text>
+          <FlatList
+            style={styles.recentRoomsList}
+            data={recentRooms}
+            keyExtractor={item => item.slug}
+            renderItem={renderRecentRoom}
+          />
+        </>
+      )}
+
       <StatusBar style="light" />
     </SafeAreaView>
   )
@@ -109,9 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_COLORS.background,
   },
   content: {
-    flex: 1,
     padding: 20,
-    justifyContent: "center",
   },
   title: {
     fontSize: 32,
@@ -177,5 +216,32 @@ const styles = StyleSheet.create({
     color: TEXT_COLORS.light,
     fontSize: 18,
     fontWeight: "600",
+  },
+  recentRoomsLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+    marginHorizontal: 20,
+    color: TEXT_COLORS.light,
+  },
+  recentRoomsList: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  recentRoomCard: {
+    backgroundColor: BACKGROUND_COLORS.secondary,
+    borderRadius: BORDER_RADIUSES.medium,
+    padding: 16,
+    marginBottom: 12,
+  },
+  recentRoomSlug: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: TEXT_COLORS.light,
+  },
+  recentRoomName: {
+    fontSize: 14,
+    color: TEXT_COLORS.placeholder,
+    marginTop: 4,
   },
 })
