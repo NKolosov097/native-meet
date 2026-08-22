@@ -12,6 +12,7 @@ import { StatusBar } from "expo-status-bar"
 
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { ChevronLeftIcon } from "@/components/icons"
 import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import {
   BACKGROUND_COLORS,
@@ -20,6 +21,7 @@ import {
 } from "@/constants/colors"
 import { configError } from "@/constants/env"
 import { fetchParticipantToken } from "@/services/livekitToken"
+import { saveRecentRoom } from "@/services/recentRooms"
 
 interface JoinScreenProps {
   // Slug of the room being joined, shown to the participant
@@ -28,10 +30,17 @@ interface JoinScreenProps {
   error?: string
   // Called with the acquired token once the user successfully joins
   onJoined: (token: string) => void
+  // Returns to room selection without joining
+  onBack: VoidFunction
 }
 
 // Login screen: the participant enters a name, the token is requested for them
-export const JoinScreen = ({ roomSlug, error, onJoined }: JoinScreenProps) => {
+export const JoinScreen = ({
+  roomSlug,
+  error,
+  onJoined,
+  onBack,
+}: JoinScreenProps) => {
   const [name, setName] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
@@ -58,6 +67,7 @@ export const JoinScreen = ({ roomSlug, error, onJoined }: JoinScreenProps) => {
     try {
       const token = await fetchParticipantToken(participantName, roomSlug)
       onJoined(token)
+      await saveRecentRoom(roomSlug, participantName)
     } catch (cause) {
       console.error("Failed to get an access token: ", cause)
       setTokenError(
@@ -77,6 +87,15 @@ export const JoinScreen = ({ roomSlug, error, onJoined }: JoinScreenProps) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={onBack}
+        hitSlop={10}
+        accessibilityLabel="Back to room selection"
+      >
+        <ChevronLeftIcon />
+      </TouchableOpacity>
+
       <View style={styles.content}>
         <Text style={styles.title}>Native Meet</Text>
         <Text style={styles.subtitle}>Room: {roomSlug}</Text>
@@ -127,6 +146,16 @@ export const JoinScreen = ({ roomSlug, error, onJoined }: JoinScreenProps) => {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: BACKGROUND_COLORS.background,
