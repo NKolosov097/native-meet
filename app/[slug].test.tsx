@@ -198,7 +198,12 @@ test("redirects to the canonical slug when the route param is not canonical", as
   await render(<RoomScreen />)
 
   expect(mockReplace).toHaveBeenCalledWith("/team-sync")
-  expect(screen.queryByLabelText("Participant name")).not.toBeOnTheScreen()
+  // The redirect only fixes the URL bar; it must not block the canonical
+  // room's join form from showing right away (see the deep-link integration
+  // test for why: gating this on canonicalness would tear down and rejoin an
+  // already-active call whenever a link to it arrives in a non-canonical form).
+  expect(screen.getByText(/team-sync/)).toBeVisible()
+  expect(screen.getByLabelText("Participant name")).toBeVisible()
   expect(mockFetchParticipantToken).not.toHaveBeenCalled()
 })
 

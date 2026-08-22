@@ -12,6 +12,7 @@ import {
 import { ActiveRoom } from "@/components/room/ActiveRoom"
 import { env } from "@/constants/env"
 import { JoinScreen } from "@/screens/JoinScreen"
+import { getActiveRoomSlug } from "@/services/activeRoomConnection"
 import { slugify } from "@/services/roomSlug"
 
 import type { ConnectionState } from "@/types"
@@ -121,22 +122,37 @@ export default function RoomScreen() {
   // to the one room a home-screen user reaches by typing the same text.
   const slug = slugify(rawSlug ?? "")
   const isCanonical = slug === rawSlug
+  // A non-canonical link matching this same route pattern pushes a brand new
+  // [slug] screen instance rather than updating an existing one's params —
+  // so when it resolves to the room already open elsewhere in the stack,
+  // this instance is a duplicate, not a fresh room to join.
+  const isDuplicateOfActiveRoom =
+    !isCanonical && slug !== "" && slug === getActiveRoomSlug()
 
   useEffect(() => {
     if (isCanonical) {
       return
     }
 
-    // Redirect rather than quietly connecting to a room the URL does not name.
-    router.replace(slug ? `/${slug}` : "/")
-  }, [isCanonical, slug, router])
+    if (isDuplicateOfActiveRoom && router.canGoBack()) {
+      // Dismiss this duplicate rather than joining afresh — the existing
+      // screen underneath is already connected to this room.
+      router.back()
+      return
+    }
 
-  if (!isCanonical) {
+    // Fix the URL/history entry to the canonical form.
+    router.replace(slug ? `/${slug}` : "/")
+  }, [isCanonical, isDuplicateOfActiveRoom, slug, router])
+
+  if (!slug || isDuplicateOfActiveRoom) {
     return null
   }
 
-  // Keyed by slug so every piece of per-room state (token, join form, active
-  // room registration) is rebuilt from scratch when the route's param changes,
-  // even when expo-router reuses this screen instance instead of remounting it.
+  // Keyed by the canonical slug so every piece of per-room state (token, join
+  // form, active room registration) is rebuilt from scratch when the room
+  // actually changes, even when expo-router reuses this screen instance
+  // instead of remounting it — but stays mounted across a non-canonical link
+  // to this same room, since the key does not change.
   return <Room key={slug} slug={slug} />
 }

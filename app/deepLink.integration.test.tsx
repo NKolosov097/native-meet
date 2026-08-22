@@ -197,6 +197,29 @@ test("keeps the call alive when the link targets the room already open", async (
   expect(screen.getByText("In call")).toBeVisible()
 })
 
+test("keeps the same call alive when a non-canonical link to the room already open arrives", async () => {
+  await renderApp()
+  await joinRoom("room-a")
+
+  // "Room-A" canonicalizes to the same "room-a" that's already active, but
+  // expo-router still updates this screen's params in place for it, since
+  // "[slug]" matches either spelling — the room must not be torn down and
+  // rejoined just because the link's casing didn't match the URL bar.
+  await openLink("nativemeet://Room-A", "/Room-A")
+
+  await waitFor(() => {
+    expect(app.getPathname()).toBe("/room-a")
+  })
+  expect(mockRooms[0].disconnect).not.toHaveBeenCalled()
+  expect(mockRooms[0].isConnected).toBe(true)
+  // A second LiveKitRoom mount would have pushed a second fake room here —
+  // this is what actually proves the call was never unmounted, not just that
+  // no code path happened to call disconnect().
+  expect(mockRooms).toHaveLength(1)
+  expect(screen.getByText("In call")).toBeVisible()
+  expect(screen.queryByLabelText("Participant name")).not.toBeOnTheScreen()
+})
+
 test("canonicalizes the slug a link points at before joining", async () => {
   await renderApp()
 

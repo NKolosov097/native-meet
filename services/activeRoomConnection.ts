@@ -20,6 +20,12 @@ export const registerActiveRoom = (
   activeRegistration = registration
 }
 
+// Slug of the currently active room, if any. Lets a freshly pushed [slug]
+// screen for a non-canonical link recognize it duplicates the room already
+// open elsewhere in the stack, instead of presenting its own join form.
+export const getActiveRoomSlug = (): string | null =>
+  activeRegistration?.slug ?? null
+
 // Clears the registry only when `registration` still owns the slot, so a room
 // unmounting after its successor registered cannot wipe the successor out and
 // leave the new call impossible to disconnect from outside its context.
