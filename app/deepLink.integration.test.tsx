@@ -258,12 +258,14 @@ test("keeps the same call alive when a non-canonical link to the room already op
   await renderApp()
   await joinRoom("room-a")
 
-  // "Room-A" canonicalizes to the same "room-a" that's already active, but
-  // expo-router pushes a brand new [slug] screen for it rather than updating
-  // the existing one's params in place, since the raw param string differs —
-  // the new screen must recognize the duplicate and dismiss itself rather
-  // than tearing the room down and rejoining just because the link's casing
-  // didn't match the URL bar.
+  // app/+native-intent.ts rewrites "Room-A" to the canonical "/room-a"
+  // before the router ever sees it, so this never becomes a raw, differently
+  // -spelled param the way it would without that hook (see app/[slug].test.tsx
+  // for a direct test of the [slug]-screen-level defense-in-depth that
+  // would still catch it if it ever did) — this test guards the
+  // native-intent + same-room-no-op combination end to end: the room must
+  // not be torn down and rejoined just because the link's casing didn't
+  // match the URL bar.
   await openLink("nativemeet://Room-A")
 
   await waitFor(() => {

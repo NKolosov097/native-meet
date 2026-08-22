@@ -122,10 +122,13 @@ export default function RoomScreen() {
   // to the one room a home-screen user reaches by typing the same text.
   const slug = slugify(rawSlug ?? "")
   const isCanonical = slug === rawSlug
-  // A non-canonical link matching this same route pattern pushes a brand new
-  // [slug] screen instance rather than updating an existing one's params —
-  // so when it resolves to the room already open elsewhere in the stack,
-  // this instance is a duplicate, not a fresh room to join.
+  // Defense-in-depth, not the primary guard: app/+native-intent.ts already
+  // canonicalizes every incoming system link before the router ever sees it,
+  // so in practice this screen never receives a non-canonical param that way.
+  // It still matters for any other route to this screen with a raw param —
+  // if one ever did produce a non-canonical duplicate of the room already
+  // open elsewhere in the stack, this instance is a duplicate to dismiss, not
+  // a fresh room to join.
   const isDuplicateOfActiveRoom =
     !isCanonical && slug !== "" && slug === getActiveRoomSlug()
 

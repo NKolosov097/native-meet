@@ -41,6 +41,12 @@ jest.mock("@/services/livekitToken", () => ({
   fetchParticipantToken: jest.fn(),
 }))
 
+let mockActiveRoomSlug: string | null = null
+
+jest.mock("@/services/activeRoomConnection", () => ({
+  getActiveRoomSlug: () => mockActiveRoomSlug,
+}))
+
 jest.mock("@/constants/env", () => ({
   env: {
     serverUrl: "wss://integration.livekit.cloud",
@@ -133,6 +139,7 @@ beforeEach(() => {
   mockBack.mockReset()
   mockReplace.mockReset()
   mockCanGoBack = true
+  mockActiveRoomSlug = null
 })
 
 afterEach(() => {
@@ -205,6 +212,33 @@ test("redirects to the canonical slug when the route param is not canonical", as
   expect(screen.getByText(/team-sync/)).toBeVisible()
   expect(screen.getByLabelText("Participant name")).toBeVisible()
   expect(mockFetchParticipantToken).not.toHaveBeenCalled()
+})
+
+test("dismisses itself instead of joining when its canonical slug duplicates the room already active", async () => {
+  // In production app/+native-intent.ts canonicalizes every system link
+  // before the router ever sees it, so this branch has no reachable trigger
+  // there — this test exercises it directly as defense-in-depth for any
+  // other route to this screen with a non-canonical param.
+  mockSlug = "Team Sync"
+  mockActiveRoomSlug = "team-sync"
+
+  await render(<RoomScreen />)
+
+  expect(mockBack).toHaveBeenCalledTimes(1)
+  expect(mockReplace).not.toHaveBeenCalled()
+  expect(screen.queryByLabelText("Participant name")).not.toBeOnTheScreen()
+  expect(mockFetchParticipantToken).not.toHaveBeenCalled()
+})
+
+test("redirects rather than dismisses when there is no history to dismiss back to", async () => {
+  mockSlug = "Team Sync"
+  mockActiveRoomSlug = "team-sync"
+  mockCanGoBack = false
+
+  await render(<RoomScreen />)
+
+  expect(mockBack).not.toHaveBeenCalled()
+  expect(mockReplace).toHaveBeenCalledWith("/team-sync")
 })
 
 test("redirects to the home screen when the slug canonicalizes to nothing", async () => {
