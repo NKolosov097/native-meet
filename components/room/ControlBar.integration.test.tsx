@@ -3,6 +3,8 @@ import { Alert } from "react-native"
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import { ControlBar } from "./ControlBar"
+import { CameraControl } from "./controls/CameraControl"
+import { MicrophoneControl } from "./controls/MicrophoneControl"
 
 jest.mock("@livekit/react-native", () => ({
   useLocalParticipant: jest.fn(),
@@ -201,6 +203,36 @@ test("re-enables the microphone button after a failed toggle", async () => {
   ).toBeFalsy()
 })
 
+test("dims the microphone button when disabled", async () => {
+  const disabled = await render(
+    <MicrophoneControl
+      isMuted={false}
+      onToggleMute={() => undefined}
+      disabled={true}
+      isDropdownVisible={false}
+      onToggleDropdown={() => undefined}
+      onCloseDropdown={() => undefined}
+    />,
+  )
+  const enabled = await render(
+    <MicrophoneControl
+      isMuted={false}
+      onToggleMute={() => undefined}
+      disabled={false}
+      isDropdownVisible={false}
+      onToggleDropdown={() => undefined}
+      onCloseDropdown={() => undefined}
+    />,
+  )
+
+  expect(disabled.getByLabelText("Mute microphone")).toHaveStyle({
+    opacity: 0.4,
+  })
+  expect(enabled.getByLabelText("Mute microphone")).toHaveStyle({
+    opacity: 1,
+  })
+})
+
 test("ignores concurrent camera toggles until the current toggle finishes", async () => {
   const pendingToggle = createDeferred()
   mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle.promise)
@@ -271,6 +303,36 @@ test("re-enables the camera button after a failed toggle", async () => {
   expect(
     view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
   ).toBeFalsy()
+})
+
+test("dims the camera button when disabled", async () => {
+  const disabled = await render(
+    <CameraControl
+      isVideoEnabled={false}
+      onToggleVideo={() => undefined}
+      disabled={true}
+      isDropdownVisible={false}
+      onToggleDropdown={() => undefined}
+      onCloseDropdown={() => undefined}
+    />,
+  )
+  const enabled = await render(
+    <CameraControl
+      isVideoEnabled={false}
+      onToggleVideo={() => undefined}
+      disabled={false}
+      isDropdownVisible={false}
+      onToggleDropdown={() => undefined}
+      onCloseDropdown={() => undefined}
+    />,
+  )
+
+  expect(disabled.getByLabelText("Turn on camera")).toHaveStyle({
+    opacity: 0.4,
+  })
+  expect(enabled.getByLabelText("Turn on camera")).toHaveStyle({
+    opacity: 1,
+  })
 })
 
 test("alerts when the microphone toggle fails", async () => {
