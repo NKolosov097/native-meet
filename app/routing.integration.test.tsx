@@ -22,12 +22,8 @@ jest.mock("@livekit/react-native", () => ({
   LiveKitRoom: () => null,
 }))
 
-jest.mock("expo-linking", () => ({
-  addEventListener: () => ({ remove: () => {} }),
-}))
-
 test("navigates from the home screen to the room identified by its slug", async () => {
-  renderRouter(
+  await renderRouter(
     {
       index: require("./index"),
       "[slug]": require("./[slug]"),
@@ -42,7 +38,7 @@ test("navigates from the home screen to the room identified by its slug", async 
 })
 
 test("joins an existing room by its typed code", async () => {
-  renderRouter(
+  await renderRouter(
     {
       index: require("./index"),
       "[slug]": require("./[slug]"),

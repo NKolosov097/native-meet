@@ -43,7 +43,7 @@ cp .env.example .env.local
 ```
 
 | Variable                         | Meaning                                                   |
-| --------------------------------- | --------------------------------------------------------- |
+| -------------------------------- | --------------------------------------------------------- |
 | `EXPO_PUBLIC_LIVEKIT_URL`        | Project URL, for example `wss://my-project.livekit.cloud` |
 | `EXPO_PUBLIC_LIVEKIT_SANDBOX_ID` | Token server ID                                           |
 
@@ -247,7 +247,7 @@ If you run into problems:
 
 1. Verify you are using a Development Build, not Expo Go
 2. Make sure all dependencies are installed correctly
-3. Check that `.env.local` exists and all three variables are filled in
+3. Check that `.env.local` exists and both variables are filled in
 4. Check that the token server is enabled in the LiveKit Cloud project settings
 5. Consult the LiveKit documentation
 
