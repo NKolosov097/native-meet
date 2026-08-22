@@ -1,4 +1,15 @@
-import { fireEvent, renderRouter, screen } from "expo-router/testing-library"
+import {
+  fireEvent,
+  renderRouter,
+  screen,
+  waitFor,
+} from "expo-router/testing-library"
+
+import { saveRecentRoom } from "@/services/recentRooms"
+
+jest.mock("@react-native-async-storage/async-storage", () =>
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+)
 
 jest.mock("@/constants/env", () => ({
   env: {},
@@ -7,11 +18,6 @@ jest.mock("@/constants/env", () => ({
 
 jest.mock("@/services/livekitToken", () => ({
   fetchParticipantToken: jest.fn(),
-}))
-
-jest.mock("@/services/recentRooms", () => ({
-  saveRecentRoom: jest.fn(),
-  getRecentRooms: jest.fn(() => Promise.resolve([])),
 }))
 
 jest.mock("@/services/roomSlug", () => {
@@ -55,4 +61,23 @@ test("joins an existing room by its typed code", async () => {
   await fireEvent.press(screen.getByLabelText("Join room"))
 
   expect(await screen.findByText(/team-sync/)).toBeVisible()
+})
+
+test("refreshes the recent-rooms list when the home screen regains focus", async () => {
+  await renderRouter(
+    { index: require("./index"), "[slug]": require("./[slug]") },
+    { initialUrl: "/" },
+  )
+
+  expect(screen.queryByText("Recent meetings")).not.toBeOnTheScreen()
+
+  await saveRecentRoom("room-a", "Ada")
+
+  await fireEvent.press(screen.getByLabelText("Create room"))
+  await fireEvent.press(screen.getByLabelText("Back to room selection"))
+
+  await waitFor(() => {
+    expect(screen.getByText("Recent meetings")).toBeVisible()
+  })
+  expect(screen.getByLabelText(/^Rejoin room-a/)).toBeVisible()
 })

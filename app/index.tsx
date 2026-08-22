@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import {
   FlatList,
   StyleSheet,
@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native"
 
-import { useRouter } from "expo-router"
+import { useFocusEffect, useRouter } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -20,25 +20,27 @@ import {
   TEXT_COLORS,
 } from "@/constants/colors"
 import { configError } from "@/constants/env"
-import { generateRoomSlug, slugify } from "@/services/roomSlug"
 import { getRecentRooms, type RecentRoom } from "@/services/recentRooms"
+import { generateRoomSlug, slugify } from "@/services/roomSlug"
 
 export default function HomeScreen() {
   const router = useRouter()
   const [roomCode, setRoomCode] = useState<string>("")
   const [recentRooms, setRecentRooms] = useState<RecentRoom[]>([])
 
-  useEffect(() => {
-    const loadRecentRooms = async (): Promise<void> => {
-      try {
-        setRecentRooms(await getRecentRooms())
-      } catch (error) {
-        console.error("Error loading recent rooms: ", error)
+  useFocusEffect(
+    useCallback(() => {
+      const loadRecentRooms = async (): Promise<void> => {
+        try {
+          setRecentRooms(await getRecentRooms())
+        } catch (error) {
+          console.error("Error loading recent rooms: ", error)
+        }
       }
-    }
 
-    loadRecentRooms()
-  }, [])
+      loadRecentRooms()
+    }, []),
+  )
 
   const joinRoom = useCallback(
     (slug: string): void => {
@@ -57,21 +59,26 @@ export default function HomeScreen() {
     joinRoom(generateRoomSlug())
   }, [joinRoom])
 
+  const isDisabled = configError !== null
+
   const renderRecentRoom = useCallback(
     ({ item }: { item: RecentRoom }) => (
       <TouchableOpacity
-        style={styles.recentRoomCard}
+        style={[
+          styles.recentRoomCard,
+          isDisabled ? styles.recentRoomCardDisabled : undefined,
+        ]}
         onPress={() => joinRoom(item.slug)}
-        accessibilityLabel={`Rejoin ${item.slug}`}
+        disabled={isDisabled}
+        accessibilityLabel={`Rejoin ${item.slug} as ${item.participantName}`}
       >
         <Text style={styles.recentRoomSlug}>{item.slug}</Text>
         <Text style={styles.recentRoomName}>{item.participantName}</Text>
       </TouchableOpacity>
     ),
-    [joinRoom],
+    [joinRoom, isDisabled],
   )
 
-  const isDisabled = configError !== null
   const isJoinDisabled = isDisabled || slugify(roomCode) === ""
 
   return (
@@ -233,6 +240,9 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUSES.medium,
     padding: 16,
     marginBottom: 12,
+  },
+  recentRoomCardDisabled: {
+    opacity: 0.4,
   },
   recentRoomSlug: {
     fontSize: 16,

@@ -67,7 +67,7 @@ export const JoinScreen = ({
     try {
       const token = await fetchParticipantToken(participantName, roomSlug)
       onJoined(token)
-      await saveRecentRoom(roomSlug, participantName)
+      saveRecentRoom(roomSlug, participantName)
     } catch (cause) {
       console.error("Failed to get an access token: ", cause)
       setTokenError(

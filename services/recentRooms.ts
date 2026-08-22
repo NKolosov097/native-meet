@@ -17,8 +17,9 @@ export interface RecentRoom {
 export const getRecentRooms = async (): Promise<RecentRoom[]> => {
   try {
     const stored = await AsyncStorage.getItem(RECENT_ROOMS_KEY)
+    const parsed: unknown = stored ? JSON.parse(stored) : []
 
-    return stored ? (JSON.parse(stored) as RecentRoom[]) : []
+    return Array.isArray(parsed) ? (parsed as RecentRoom[]) : []
   } catch (error) {
     console.error("Error reading recent rooms: ", error)
     return []

@@ -83,8 +83,6 @@ const Room = ({ slug }: RoomProps) => {
     goToHomeScreen()
   }, [goToHomeScreen])
 
-  const onBack = goToHomeScreen
-
   const onConnectionError = useCallback((error?: Error): void => {
     console.error("Connection error: ", error)
     setConnectionState({
@@ -99,7 +97,7 @@ const Room = ({ slug }: RoomProps) => {
         roomSlug={slug}
         error={connectionState.error}
         onJoined={onJoined}
-        onBack={onBack}
+        onBack={goToHomeScreen}
       />
     )
   }

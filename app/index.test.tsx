@@ -1,15 +1,20 @@
-import { fireEvent, render, screen } from "@testing-library/react-native"
-
-import type { RecentRoom } from "@/services/recentRooms"
+import { act, fireEvent, render, screen } from "@testing-library/react-native"
 
 import HomeScreen from "./index"
+
+import type { RecentRoom } from "@/services/recentRooms"
 
 const mockPush = jest.fn()
 let mockConfigError: string | null = null
 let mockRecentRooms: RecentRoom[] = []
+let latestFocusEffect: (() => void) | undefined
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: mockPush }),
+  useFocusEffect: (effect: () => void) => {
+    latestFocusEffect = effect
+    jest.requireActual("react").useEffect(effect, [])
+  },
 }))
 
 jest.mock("@/constants/env", () => ({
@@ -35,6 +40,7 @@ beforeEach(() => {
   mockConfigError = null
   mockRecentRooms = []
   mockPush.mockReset()
+  latestFocusEffect = undefined
 })
 
 test("joins a room by typed code, slugified", async () => {
@@ -70,12 +76,14 @@ test("creates a new room with a generated slug", async () => {
 
 test("disables both actions and shows a configuration error", async () => {
   mockConfigError = "Missing environment variables: EXPO_PUBLIC_LIVEKIT_URL"
+  mockRecentRooms = [{ slug: "room-a", participantName: "Ada", joinedAt: 100 }]
   await render(<HomeScreen />)
 
   expect(screen.getByText(mockConfigError)).toBeVisible()
   expect(screen.getByLabelText("Room code")).toBeDisabled()
   expect(screen.getByLabelText("Join room")).toBeDisabled()
   expect(screen.getByLabelText("Create room")).toBeDisabled()
+  expect(await screen.findByLabelText(/^Rejoin /)).toBeDisabled()
 })
 
 test("renders no recent-rooms section when there is no history", async () => {
@@ -93,8 +101,8 @@ test("lists recent rooms most-recently-joined first", async () => {
 
   const rows = await screen.findAllByLabelText(/^Rejoin /)
   expect(rows.map(row => row.props.accessibilityLabel)).toEqual([
-    "Rejoin room-b",
-    "Rejoin room-a",
+    "Rejoin room-b as Grace",
+    "Rejoin room-a as Ada",
   ])
   expect(screen.getByText("Grace")).toBeVisible()
   expect(screen.getByText("Ada")).toBeVisible()
@@ -104,7 +112,21 @@ test("rejoins a recent room by tapping its card", async () => {
   mockRecentRooms = [{ slug: "room-a", participantName: "Ada", joinedAt: 100 }]
   await render(<HomeScreen />)
 
-  await fireEvent.press(await screen.findByLabelText("Rejoin room-a"))
+  await fireEvent.press(await screen.findByLabelText("Rejoin room-a as Ada"))
 
   expect(mockPush).toHaveBeenCalledWith("/room-a")
+})
+
+test("reloads recent rooms each time the screen regains focus", async () => {
+  await render(<HomeScreen />)
+
+  expect(screen.queryByText("Recent meetings")).not.toBeOnTheScreen()
+
+  mockRecentRooms = [{ slug: "room-a", participantName: "Ada", joinedAt: 100 }]
+
+  await act(async () => {
+    latestFocusEffect?.()
+  })
+
+  expect(await screen.findByLabelText("Rejoin room-a as Ada")).toBeVisible()
 })
