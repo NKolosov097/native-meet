@@ -19,6 +19,7 @@ export const ControlBar = () => {
   const { localParticipant, isCameraEnabled, isMicrophoneEnabled } =
     useLocalParticipant()
   const isTogglingMicrophone = useRef<boolean>(false)
+  const [isMicrophoneToggling, setIsMicrophoneToggling] = useState(false)
   const isTogglingCamera = useRef<boolean>(false)
   const [openDeviceDropdown, setOpenDeviceDropdown] =
     useState<DeviceDropdownSource | null>(null)
@@ -35,6 +36,7 @@ export const ControlBar = () => {
     if (isTogglingMicrophone.current) return
 
     isTogglingMicrophone.current = true
+    setIsMicrophoneToggling(true)
 
     try {
       await localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
@@ -43,6 +45,7 @@ export const ControlBar = () => {
       Alert.alert("Error", "Failed to toggle microphone")
     } finally {
       isTogglingMicrophone.current = false
+      setIsMicrophoneToggling(false)
     }
   }, [localParticipant, isMicrophoneEnabled])
 
@@ -88,6 +91,7 @@ export const ControlBar = () => {
         <MicrophoneControl
           isMuted={!isMicrophoneEnabled}
           onToggleMute={toggleMute}
+          disabled={isMicrophoneToggling}
           isDropdownVisible={openDeviceDropdown === Track.Source.Microphone}
           onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Microphone)}
           onCloseDropdown={() => setOpenDeviceDropdown(null)}

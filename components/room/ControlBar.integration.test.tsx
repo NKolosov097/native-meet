@@ -146,6 +146,61 @@ test("ignores concurrent microphone toggles until the current toggle finishes", 
   expect(mockLocalParticipant.setMicrophoneEnabled).toHaveBeenCalledTimes(2)
 })
 
+test("disables the microphone button while its toggle is pending", async () => {
+  const pendingToggle = createDeferred()
+  mockLocalParticipant.setMicrophoneEnabled.mockReturnValue(
+    pendingToggle.promise,
+  )
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Mute microphone")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    pendingToggle.resolve()
+    await pendingToggle.promise
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
+test("re-enables the microphone button after a failed toggle", async () => {
+  jest.spyOn(Alert, "alert").mockImplementation()
+  jest.spyOn(console, "error").mockImplementation()
+  let rejectToggle: (error: Error) => void = () => undefined
+  const pendingToggle = new Promise<void>((_, reject) => {
+    rejectToggle = reject
+  })
+  mockLocalParticipant.setMicrophoneEnabled.mockReturnValue(pendingToggle)
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Mute microphone")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    rejectToggle(new Error("microphone failed"))
+    await pendingToggle.catch(() => undefined)
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
 test("ignores concurrent camera toggles until the current toggle finishes", async () => {
   const pendingToggle = createDeferred()
   mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle.promise)

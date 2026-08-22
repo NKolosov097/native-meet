@@ -40,6 +40,8 @@ interface MicrophoneControlProps {
   isMuted: boolean
   // Toggles the local microphone mute state
   onToggleMute: VoidFunction
+  // Whether the mute toggle is mid-flight and should reject taps
+  disabled: boolean
   // Whether the microphone device dropdown is currently open
   isDropdownVisible: boolean
   // Opens/closes the microphone device dropdown
@@ -51,6 +53,7 @@ interface MicrophoneControlProps {
 export const MicrophoneControl = ({
   isMuted,
   onToggleMute,
+  disabled,
   isDropdownVisible,
   onToggleDropdown,
   onCloseDropdown,
@@ -150,8 +153,12 @@ export const MicrophoneControl = ({
       >
         {/* Microphone button */}
         <TouchableOpacity
-          style={styles.micButton}
+          style={[
+            styles.micButton,
+            disabled ? styles.micButtonDisabled : undefined,
+          ]}
           onPress={onToggleMute}
+          disabled={disabled}
           accessibilityLabel={isMuted ? "Unmute microphone" : "Mute microphone"}
         >
           {isMuted ? <MicDisabledIcon /> : <MicIcon />}
@@ -287,6 +294,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: BORDER_RADIUSES.pill,
     justifyContent: "center",
     alignItems: "center",
+  },
+  micButtonDisabled: {
+    opacity: 0.4,
   },
   dropdownButton: {
     backgroundColor: BACKGROUND_COLORS.secondary,
