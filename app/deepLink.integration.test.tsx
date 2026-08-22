@@ -1,7 +1,5 @@
 import type { EmitterSubscription } from "react-native"
 
-import { router } from "expo-router"
-
 import {
   act,
   fireEvent,
@@ -11,10 +9,16 @@ import {
 } from "expo-router/testing-library"
 
 // A stand-in for livekit-client's Room: the only behavior the deep-link flow
-// needs is that disconnect() eventually makes LiveKitRoom report a disconnect.
+// needs is that disconnect() eventually makes LiveKitRoom report a disconnect
+// while mounted, and tears the connection down silently (no onDisconnected)
+// when it happens because the LiveKitRoom wrapper itself unmounted — matching
+// @livekit/components-react's useLiveKitRoom(), which detaches its listeners
+// as part of the same unmount cleanup that calls disconnect().
 interface FakeRoom {
   // Whether the fake room still considers itself connected
   isConnected: boolean
+  // Whether the LiveKitRoom wrapper that owns this room has unmounted
+  unmounted: boolean
   // Tears the fake connection down and reports it, like RoomEvent.Disconnected
   disconnect: jest.Mock<Promise<void>, []>
 }
@@ -68,18 +72,33 @@ jest.mock("@livekit/react-native", () => {
       const room = React.useMemo(() => {
         const fake: FakeRoom = {
           isConnected: true,
+          unmounted: false,
           disconnect: jest.fn<Promise<void>, []>(async () => {
+            if (!fake.isConnected) {
+              return
+            }
+
             // A real disconnect is several awaits deep before the room reports
             // it, so the event always lands after the router has navigated.
             await Promise.resolve()
             fake.isConnected = false
-            onDisconnectedRef.current?.()
+
+            if (!fake.unmounted) {
+              onDisconnectedRef.current?.()
+            }
           }),
         }
         mockRooms.push(fake)
 
         return fake
       }, [])
+
+      React.useEffect(() => {
+        return () => {
+          room.unmounted = true
+          room.disconnect()
+        }
+      }, [room])
 
       return React.createElement(
         RoomContext.Provider,
@@ -116,6 +135,7 @@ const renderApp = async (): Promise<void> => {
       _layout: require("./_layout"),
       index: require("./index"),
       "[slug]": require("./[slug]"),
+      "+native-intent": require("./+native-intent"),
     },
     { initialUrl: "/" },
   )
@@ -139,11 +159,12 @@ const joinRoom = async (slug: string) => {
 }
 
 // Delivers an incoming link the way the OS does: every "url" subscriber sees
-// it, and expo-router's own subscription navigates to the linked route.
-const openLink = async (url: string, pathname: string) => {
+// it. Firing the event alone already drives expo-router's own subscription
+// (getStateFromPath -> getActionFromState -> the real StackRouter) through
+// to a navigation — nothing here needs to additionally call router.navigate.
+const openLink = async (url: string) => {
   await act(async () => {
     linkListeners.forEach(listener => listener({ url }))
-    router.navigate(pathname)
   })
 }
 
@@ -174,12 +195,16 @@ test("stays on the room a mid-call link navigated to", async () => {
   await joinRoom("room-a")
   expect(mockRooms).toHaveLength(1)
 
-  await openLink("nativemeet://room-b", "/room-b")
+  await openLink("nativemeet://room-b")
 
   // The old call is gone, and the screen the link opened is still the one in
   // front of the user: the disconnect must not drag them back out of room B.
+  // disconnect() is called twice — once explicitly by the registry, once
+  // more by LiveKitRoom's own unmount cleanup once onForcedDisconnect clears
+  // the token and unmounts it — matching real usage, where Room.disconnect()
+  // is idempotent, so this is expected rather than a double-teardown bug.
   await waitFor(() => {
-    expect(mockRooms[0].disconnect).toHaveBeenCalledTimes(1)
+    expect(mockRooms[0].disconnect).toHaveBeenCalledTimes(2)
   })
   expect(app.getPathname()).toBe("/room-b")
   expect(screen.getByText("Room: room-b")).toBeVisible()
@@ -190,11 +215,43 @@ test("keeps the call alive when the link targets the room already open", async (
   await renderApp()
   await joinRoom("room-a")
 
-  await openLink("nativemeet://room-a", "/room-a")
+  await openLink("nativemeet://room-a")
 
   expect(mockRooms[0].disconnect).not.toHaveBeenCalled()
   expect(app.getPathname()).toBe("/room-a")
   expect(screen.getByText("In call")).toBeVisible()
+})
+
+test("keeps the call alive when an unroutable link (extra path segment) points at the room already open", async () => {
+  await renderApp()
+  await joinRoom("room-a")
+
+  // A path expo-router can't match to any screen would otherwise resolve to
+  // its auto-injected "+not-found" route, which the root layout's <Stack>
+  // renders as the sole focused route — unmounting the whole navigation
+  // tree, live call included, without ever going through the registry.
+  // +native-intent.ts collapses this to the one slug _layout.tsx already
+  // reasoned about, so it never reaches "+not-found" at all.
+  await openLink("nativemeet://room-a/extra")
+
+  expect(mockRooms[0].disconnect).not.toHaveBeenCalled()
+  expect(mockRooms[0].unmounted).toBe(false)
+  expect(mockRooms[0].isConnected).toBe(true)
+  expect(mockRooms).toHaveLength(1)
+  expect(app.getPathname()).toBe("/room-a")
+  expect(screen.getByText("In call")).toBeVisible()
+})
+
+test("drops an unroutable link to a different room instead of stranding on +not-found", async () => {
+  await renderApp()
+  await joinRoom("room-a")
+
+  await openLink("nativemeet://room-b/extra")
+
+  await waitFor(() => {
+    expect(app.getPathname()).toBe("/room-b")
+  })
+  expect(screen.getByLabelText("Participant name")).toBeVisible()
 })
 
 test("keeps the same call alive when a non-canonical link to the room already open arrives", async () => {
@@ -202,10 +259,12 @@ test("keeps the same call alive when a non-canonical link to the room already op
   await joinRoom("room-a")
 
   // "Room-A" canonicalizes to the same "room-a" that's already active, but
-  // expo-router still updates this screen's params in place for it, since
-  // "[slug]" matches either spelling — the room must not be torn down and
-  // rejoined just because the link's casing didn't match the URL bar.
-  await openLink("nativemeet://Room-A", "/Room-A")
+  // expo-router pushes a brand new [slug] screen for it rather than updating
+  // the existing one's params in place, since the raw param string differs —
+  // the new screen must recognize the duplicate and dismiss itself rather
+  // than tearing the room down and rejoining just because the link's casing
+  // didn't match the URL bar.
+  await openLink("nativemeet://Room-A")
 
   await waitFor(() => {
     expect(app.getPathname()).toBe("/room-a")
@@ -223,7 +282,7 @@ test("keeps the same call alive when a non-canonical link to the room already op
 test("canonicalizes the slug a link points at before joining", async () => {
   await renderApp()
 
-  await openLink("nativemeet://Room%20B", "/Room B")
+  await openLink("nativemeet://Room%20B")
 
   await waitFor(() => {
     expect(app.getPathname()).toBe("/room-b")
