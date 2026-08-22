@@ -64,6 +64,14 @@ const Room = ({ slug }: RoomProps) => {
     setConnectionState(initialConnectionState)
   }, [])
 
+  const goToHomeScreen = useCallback((): void => {
+    if (router.canGoBack()) {
+      router.back()
+    } else {
+      router.replace("/")
+    }
+  }, [router])
+
   const onDisconnect = useCallback((): void => {
     setConnectionState(initialConnectionState)
 
@@ -72,12 +80,10 @@ const Room = ({ slug }: RoomProps) => {
       return
     }
 
-    if (router.canGoBack()) {
-      router.back()
-    } else {
-      router.replace("/")
-    }
-  }, [router])
+    goToHomeScreen()
+  }, [goToHomeScreen])
+
+  const onBack = goToHomeScreen
 
   const onConnectionError = useCallback((error?: Error): void => {
     console.error("Connection error: ", error)
@@ -93,6 +99,7 @@ const Room = ({ slug }: RoomProps) => {
         roomSlug={slug}
         error={connectionState.error}
         onJoined={onJoined}
+        onBack={onBack}
       />
     )
   }

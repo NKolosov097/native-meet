@@ -392,3 +392,24 @@ test("clears a connection error when a later room join succeeds", async () => {
 
   expect(screen.queryByText("room unavailable")).not.toBeOnTheScreen()
 })
+
+test("returns to the home screen via the join screen's back button", async () => {
+  mockSlug = "room-a"
+  await render(<RoomScreen />)
+
+  await fireEvent.press(screen.getByLabelText("Back to room selection"))
+
+  expect(mockBack).toHaveBeenCalledTimes(1)
+  expect(mockReplace).not.toHaveBeenCalled()
+})
+
+test("replaces with the home screen when there is no history to go back to", async () => {
+  mockSlug = "room-a"
+  mockCanGoBack = false
+  await render(<RoomScreen />)
+
+  await fireEvent.press(screen.getByLabelText("Back to room selection"))
+
+  expect(mockReplace).toHaveBeenCalledWith("/")
+  expect(mockBack).not.toHaveBeenCalled()
+})
