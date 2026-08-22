@@ -30,6 +30,30 @@ export const slugify = (input: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
 
+// Percent-decoding fails on a malformed escape ("%zz"), which a deep link is
+// free to contain — fall back to the raw text and let slugify clean it up.
+const decodeSegment = (segment: string): string => {
+  try {
+    return decodeURIComponent(segment)
+  } catch {
+    return segment
+  }
+}
+
+// Canonical slug an incoming deep link (`nativemeet://<slug>`) points at, run
+// through the same slugify() a typed room code goes through so
+// `nativemeet://Team%20Sync` and a typed "Team Sync" reach the same room.
+// Returns "" for a link that names no room, for example "nativemeet://".
+// Only the app's own scheme is in scope here (universal links on a real domain
+// are deliberately deferred), so the first component after "<scheme>://" is
+// the room — expo-router routes the same component to the [slug] param.
+export const roomSlugFromUrl = (url: string): string => {
+  const path = url.replace(/^[a-z][a-z\d+.-]*:\/\//i, "").split(/[?#]/)[0]
+  const [segment] = path.split("/").filter(part => part !== "")
+
+  return segment ? slugify(decodeSegment(segment)) : ""
+}
+
 export const generateRoomSlug = (): string => {
   const adjective =
     ROOM_SLUG_ADJECTIVES[

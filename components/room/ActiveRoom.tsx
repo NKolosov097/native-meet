@@ -10,8 +10,18 @@ import { ControlBar } from "./ControlBar"
 import { useRegisterActiveRoomDisconnect } from "./useRegisterActiveRoomDisconnect"
 import { VideoConference } from "./VideoConference"
 
-export const ActiveRoom = () => {
-  useRegisterActiveRoomDisconnect()
+interface ActiveRoomProps {
+  // Slug of the room this call belongs to, published to the active-room registry
+  roomSlug: string
+  // Called when the app (not the user) ends this call for an incoming room link
+  onForcedDisconnect: VoidFunction
+}
+
+export const ActiveRoom = ({
+  roomSlug,
+  onForcedDisconnect,
+}: ActiveRoomProps) => {
+  useRegisterActiveRoomDisconnect(roomSlug, onForcedDisconnect)
 
   return (
     <SafeAreaView style={styles.roomContainer}>
