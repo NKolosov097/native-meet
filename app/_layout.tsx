@@ -9,9 +9,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context"
 import { GridPreview } from "@/components/room/grid/GridPreview"
 import { disconnectActiveRoom } from "@/services/activeRoomConnection"
 
-const isGridPreview = process.env.EXPO_PUBLIC_GRID_PREVIEW === "1"
-
 export default function RootLayout() {
+  const isGridPreview = process.env.EXPO_PUBLIC_GRID_PREVIEW === "1"
+
   useEffect(() => {
     LogBox.ignoreLogs([
       "An event listener wasn't added because it has been added already",
