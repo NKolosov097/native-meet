@@ -34,6 +34,7 @@ jest.mock("@/services/livekitToken", () => ({
 jest.mock("@/services/recentRooms", () => ({
   saveRecentRoom: jest.fn(),
   getRecentRooms: jest.fn(() => Promise.resolve([])),
+  getRecentRoom: jest.fn(() => Promise.resolve(null)),
 }))
 
 jest.mock("@/components/room/grid/GridPreview", () => ({

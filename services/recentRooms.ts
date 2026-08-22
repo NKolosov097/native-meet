@@ -26,6 +26,20 @@ export const getRecentRooms = async (): Promise<RecentRoom[]> => {
   }
 }
 
+// Finds the recent room for a slug, or null if it has never been joined.
+export const getRecentRoom = async (
+  slug: string,
+): Promise<RecentRoom | null> => {
+  try {
+    const rooms = await getRecentRooms()
+
+    return rooms.find(room => room.slug === slug) ?? null
+  } catch (error) {
+    console.error("Error finding a recent room: ", error)
+    return null
+  }
+}
+
 // Upserts by slug (rejoining under a new name replaces the old entry rather
 // than duplicating it), most-recent-first, capped at MAX_RECENT_ROOMS.
 export const saveRecentRoom = async (

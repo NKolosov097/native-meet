@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   ActivityIndicator,
   StyleSheet,
@@ -21,7 +21,7 @@ import {
 } from "@/constants/colors"
 import { configError } from "@/constants/env"
 import { fetchParticipantToken } from "@/services/livekitToken"
-import { saveRecentRoom } from "@/services/recentRooms"
+import { getRecentRoom, saveRecentRoom } from "@/services/recentRooms"
 
 interface JoinScreenProps {
   // Slug of the room being joined, shown to the participant
@@ -47,6 +47,22 @@ export const JoinScreen = ({
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [hasStartedJoin, setHasStartedJoin] = useState<boolean>(false)
   const isJoiningRef = useRef<boolean>(false)
+
+  useEffect(() => {
+    const loadRecentName = async (): Promise<void> => {
+      try {
+        const recentRoom = await getRecentRoom(roomSlug)
+
+        if (recentRoom) {
+          setName(recentRoom.participantName)
+        }
+      } catch (cause) {
+        console.error("Error loading the recent participant name: ", cause)
+      }
+    }
+
+    loadRecentName()
+  }, [roomSlug])
 
   const join = useCallback(async (): Promise<void> => {
     if (isJoiningRef.current) {

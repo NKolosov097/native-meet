@@ -12,12 +12,21 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 const loadRecentRooms = () => {
   let getRecentRooms: typeof import("./recentRooms").getRecentRooms
   let saveRecentRoom: typeof import("./recentRooms").saveRecentRoom
+  let getRecentRoom: typeof import("./recentRooms").getRecentRoom
 
   jest.isolateModules(() => {
-    ;({ getRecentRooms, saveRecentRoom } = require("./recentRooms"))
+    ;({
+      getRecentRooms,
+      saveRecentRoom,
+      getRecentRoom,
+    } = require("./recentRooms"))
   })
 
-  return { getRecentRooms: getRecentRooms!, saveRecentRoom: saveRecentRoom! }
+  return {
+    getRecentRooms: getRecentRooms!,
+    saveRecentRoom: saveRecentRoom!,
+    getRecentRoom: getRecentRoom!,
+  }
 }
 
 beforeEach(() => {
@@ -122,6 +131,31 @@ test("caps the list at 20 entries, dropping the oldest", async () => {
   expect(saved).toHaveLength(20)
   expect(saved[0].slug).toBe("room-new")
   expect(saved.find(room => room.slug === "room-19")).toBeUndefined()
+})
+
+test("finds a recent room by slug", async () => {
+  mockGetItem.mockResolvedValue(
+    JSON.stringify([
+      { slug: "room-a", participantName: "Ada", joinedAt: 1 },
+      { slug: "room-b", participantName: "Grace", joinedAt: 2 },
+    ]),
+  )
+  const { getRecentRoom } = loadRecentRooms()
+
+  await expect(getRecentRoom("room-b")).resolves.toEqual({
+    slug: "room-b",
+    participantName: "Grace",
+    joinedAt: 2,
+  })
+})
+
+test("returns null when no recent room matches the slug", async () => {
+  mockGetItem.mockResolvedValue(
+    JSON.stringify([{ slug: "room-a", participantName: "Ada", joinedAt: 1 }]),
+  )
+  const { getRecentRoom } = loadRecentRooms()
+
+  await expect(getRecentRoom("room-z")).resolves.toBeNull()
 })
 
 test("logs and resolves instead of throwing when persisting fails", async () => {

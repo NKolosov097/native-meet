@@ -23,15 +23,18 @@ jest.mock("@/constants/env", () => ({
 
 jest.mock("@/services/recentRooms", () => ({
   saveRecentRoom: jest.fn(),
+  getRecentRoom: jest.fn(),
 }))
 
 const { fetchParticipantToken: mockFetchParticipantToken } = jest.requireMock(
   "@/services/livekitToken",
 ) as { fetchParticipantToken: jest.Mock }
 
-const { saveRecentRoom: mockSaveRecentRoom } = jest.requireMock(
-  "@/services/recentRooms",
-) as { saveRecentRoom: jest.Mock }
+const { saveRecentRoom: mockSaveRecentRoom, getRecentRoom: mockGetRecentRoom } =
+  jest.requireMock("@/services/recentRooms") as {
+    saveRecentRoom: jest.Mock
+    getRecentRoom: jest.Mock
+  }
 
 const deferred = <T,>() => {
   let resolve!: (value: T) => void
@@ -48,6 +51,7 @@ beforeEach(() => {
   mockConfigError = null
   mockFetchParticipantToken.mockReset()
   mockSaveRecentRoom.mockReset()
+  mockGetRecentRoom.mockReset().mockResolvedValue(null)
   jest.spyOn(console, "error").mockImplementation()
 })
 
@@ -65,6 +69,41 @@ test("shows which room is being joined", async () => {
   )
 
   expect(screen.getByText(/quiet-tiger-42/)).toBeVisible()
+})
+
+test("prefills the participant name from a known recent room", async () => {
+  mockGetRecentRoom.mockResolvedValue({
+    slug: "quiet-tiger-42",
+    participantName: "Ada",
+    joinedAt: 100,
+  })
+
+  await render(
+    <JoinScreen
+      roomSlug="quiet-tiger-42"
+      onJoined={jest.fn()}
+      onBack={jest.fn()}
+    />,
+  )
+
+  expect(mockGetRecentRoom).toHaveBeenCalledWith("quiet-tiger-42")
+  expect(await screen.findByLabelText("Participant name")).toHaveProp(
+    "value",
+    "Ada",
+  )
+})
+
+test("leaves the name field empty for a room with no history", async () => {
+  await render(
+    <JoinScreen
+      roomSlug="quiet-tiger-42"
+      onJoined={jest.fn()}
+      onBack={jest.fn()}
+    />,
+  )
+
+  expect(mockGetRecentRoom).toHaveBeenCalledWith("quiet-tiger-42")
+  expect(screen.getByLabelText("Participant name")).toHaveProp("value", "")
 })
 
 test("rejects an empty name without requesting a token", async () => {
