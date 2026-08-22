@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   ActivityIndicator,
   StyleSheet,
@@ -10,8 +10,9 @@ import {
 
 import { StatusBar } from "expo-status-bar"
 
-import { SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { ChevronLeftIcon } from "@/components/icons"
 import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
 import {
   BACKGROUND_COLORS,
@@ -20,21 +21,48 @@ import {
 } from "@/constants/colors"
 import { configError } from "@/constants/env"
 import { fetchParticipantToken } from "@/services/livekitToken"
+import { getRecentRoom, saveRecentRoom } from "@/services/recentRooms"
 
 interface JoinScreenProps {
+  // Slug of the room being joined, shown to the participant
+  roomSlug: string
   // Message from the most recent failed join/connection attempt, if any
   error?: string
   // Called with the acquired token once the user successfully joins
   onJoined: (token: string) => void
+  // Returns to room selection without joining
+  onBack: VoidFunction
 }
 
 // Login screen: the participant enters a name, the token is requested for them
-export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
+export const JoinScreen = ({
+  roomSlug,
+  error,
+  onJoined,
+  onBack,
+}: JoinScreenProps) => {
+  const insets = useSafeAreaInsets()
   const [name, setName] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [hasStartedJoin, setHasStartedJoin] = useState<boolean>(false)
   const isJoiningRef = useRef<boolean>(false)
+
+  useEffect(() => {
+    const loadRecentName = async (): Promise<void> => {
+      try {
+        const recentRoom = await getRecentRoom(roomSlug)
+
+        if (recentRoom) {
+          setName(recentRoom.participantName)
+        }
+      } catch (cause) {
+        console.error("Error loading the recent participant name: ", cause)
+      }
+    }
+
+    loadRecentName()
+  }, [roomSlug])
 
   const join = useCallback(async (): Promise<void> => {
     if (isJoiningRef.current) {
@@ -54,8 +82,9 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
     setTokenError(null)
 
     try {
-      const token = await fetchParticipantToken(participantName)
+      const token = await fetchParticipantToken(participantName, roomSlug)
       onJoined(token)
+      saveRecentRoom(roomSlug, participantName)
     } catch (cause) {
       console.error("Failed to get an access token: ", cause)
       setTokenError(
@@ -67,7 +96,7 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
       setIsLoading(false)
       isJoiningRef.current = false
     }
-  }, [name, onJoined])
+  }, [name, roomSlug, onJoined])
 
   const message =
     configError ?? tokenError ?? (hasStartedJoin ? undefined : error)
@@ -75,8 +104,21 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity
+        style={[
+          styles.backButton,
+          { top: insets.top + 20, left: insets.left + 20 },
+        ]}
+        onPress={onBack}
+        hitSlop={10}
+        accessibilityLabel="Back to room selection"
+      >
+        <ChevronLeftIcon />
+      </TouchableOpacity>
+
       <View style={styles.content}>
         <Text style={styles.title}>Native Meet</Text>
+        <Text style={styles.subtitle}>Room: {roomSlug}</Text>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Your name:</Text>
@@ -124,6 +166,14 @@ export const JoinScreen = ({ error, onJoined }: JoinScreenProps) => {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: "absolute",
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: BACKGROUND_COLORS.background,
@@ -139,6 +189,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
     color: TEXT_COLORS.light,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+    color: TEXT_COLORS.placeholder,
   },
   inputContainer: {
     marginBottom: 20,

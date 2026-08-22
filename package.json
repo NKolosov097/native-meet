@@ -56,7 +56,14 @@
       "^@/(.*)$": "<rootDir>/$1"
     },
     "testPathIgnorePatterns": [
-      "\\.node\\.test\\.ts$"
+      "\\.node\\.test\\.ts$",
+      "<rootDir>/\\.claude/worktrees/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/\\.claude/worktrees/"
+    ],
+    "watchPathIgnorePatterns": [
+      "<rootDir>/\\.claude/worktrees/"
     ]
   },
   "devDependencies": {

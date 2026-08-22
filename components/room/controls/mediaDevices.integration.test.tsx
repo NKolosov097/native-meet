@@ -42,6 +42,7 @@ const devices: MediaDeviceInfo[] = [
 const microphoneProps = (onCloseDropdown = jest.fn()) => ({
   isMuted: false,
   onToggleMute: jest.fn(),
+  disabled: false,
   isDropdownVisible: true,
   onToggleDropdown: jest.fn(),
   onCloseDropdown,
@@ -50,6 +51,7 @@ const microphoneProps = (onCloseDropdown = jest.fn()) => ({
 const cameraProps = (onCloseDropdown = jest.fn()) => ({
   isVideoEnabled: true,
   onToggleVideo: jest.fn(),
+  disabled: false,
   isDropdownVisible: true,
   onToggleDropdown: jest.fn(),
   onCloseDropdown,

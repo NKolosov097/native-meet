@@ -46,7 +46,6 @@ cp .env.example .env.local
 | -------------------------------- | --------------------------------------------------------- |
 | `EXPO_PUBLIC_LIVEKIT_URL`        | Project URL, for example `wss://my-project.livekit.cloud` |
 | `EXPO_PUBLIC_LIVEKIT_SANDBOX_ID` | Token server ID                                           |
-| `EXPO_PUBLIC_LIVEKIT_ROOM`       | Name of the room every participant joins                  |
 
 `.env.local` is git-ignored. If a variable is missing, the login screen says
 which one and the "Join" button stays disabled.
@@ -88,12 +87,39 @@ eas build --platform ios --profile development
 ## Usage
 
 1. Start the app
-2. Enter your name
-3. Press "Join" — the app requests an access token and joins the room from
-   `EXPO_PUBLIC_LIVEKIT_ROOM`
+2. Enter a room code to join an existing room, or tap "Create a new room"
+3. Enter your name
+4. Press "Join" — the app requests an access token and joins that room
 
-Participants with the same name do not clash: the display name is what you
-typed, while the LiveKit identity gets a random suffix.
+### Room links
+
+Every room has a shareable link under the app's own URL scheme:
+
+```
+nativemeet://<slug>
+nativemeet://team-sync
+```
+
+Opening one takes the participant straight to that room's name-entry screen,
+skipping the home screen. The slug is canonicalized exactly like a typed room
+code (lowercased, anything else collapsed into `-`), so `nativemeet://Team Sync`
+and `nativemeet://team-sync` are the same room; a link that names no room
+redirects to the home screen. A link that arrives while a call is in progress
+disconnects that call first, unless it points at the room already open.
+
+Open a link by hand to test it:
+
+```bash
+# Android (device or emulator)
+npx uri-scheme open "nativemeet://test-room" --android
+
+# iOS simulator
+xcrun simctl openurl booted "nativemeet://test-room"
+```
+
+The scheme is declared in `app.json` (`expo.scheme`), so it only reaches the
+native projects through `npx expo prebuild` — run it (or `npx expo prebuild
+--clean`) before expecting a link to open the app.
 
 ## Configuration
 
@@ -125,27 +151,17 @@ The project is configured with:
 
 ```
 native-meet/
-├── App.tsx              # Main app component (TypeScript)
-├── screens/             # App screens
-│   └── JoinScreen.tsx   # Login screen with the participant name input
+├── app/                 # expo-router routes
+│   ├── _layout.tsx      # Root layout: providers, deep-link handling
+│   ├── index.tsx        # Home screen: join or create a room by slug
+│   └── [slug].tsx       # Per-room screen: join form + video call
+├── screens/             # Reusable screen components
+│   └── JoinScreen.tsx   # Name-entry form, shown by app/[slug].tsx
 ├── components/          # UI components
 │   └── room/            # Video call screen and its controls
-├── services/            # External services
-│   └── livekitToken.ts  # Access token fetching from the token server
-├── constants/           # Colors and environment configuration
-│   ├── colors.ts
-│   └── env.ts
-├── types/               # TypeScript types
-│   └── index.ts         # Core interfaces and types
-├── .env.example         # Template for .env.local
-├── app.json             # Expo configuration
-├── tsconfig.json        # TypeScript configuration
-├── package.json         # Project dependencies
-├── assets/              # App assets
-│   ├── icon.png
-│   ├── splash-icon.png
-│   └── ...
-└── README.md            # Documentation
+├── services/            # External services and pure utilities
+│   ├── livekitToken.ts  # Access token fetching from the token server
+│   └── roomSlug.ts      # Slug generation and validation
 ```
 
 ## TypeScript
@@ -261,7 +277,7 @@ If you run into problems:
 
 1. Verify you are using a Development Build, not Expo Go
 2. Make sure all dependencies are installed correctly
-3. Check that `.env.local` exists and all three variables are filled in
+3. Check that `.env.local` exists and both variables are filled in
 4. Check that the token server is enabled in the LiveKit Cloud project settings
 5. Consult the LiveKit documentation
 

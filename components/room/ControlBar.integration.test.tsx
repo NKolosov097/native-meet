@@ -3,6 +3,8 @@ import { Alert } from "react-native"
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import { ControlBar } from "./ControlBar"
+import { CameraControl } from "./controls/CameraControl"
+import { MicrophoneControl } from "./controls/MicrophoneControl"
 
 jest.mock("@livekit/react-native", () => ({
   useLocalParticipant: jest.fn(),
@@ -28,6 +30,8 @@ type PressTarget = {
   }
 }
 
+const noop: VoidFunction = () => undefined
+
 const pressTwice = async (target: PressTarget): Promise<void> => {
   // RNTL's public fireEvent.press awaits the async handler, so invoking it
   // twice cannot exercise two presses in the same pending window.
@@ -42,7 +46,7 @@ const pressTwice = async (target: PressTarget): Promise<void> => {
 }
 
 const createDeferred = (): Deferred => {
-  let resolve = (): void => undefined
+  let resolve: VoidFunction = noop
   const promise = new Promise<void>(complete => {
     resolve = complete
   })
@@ -146,6 +150,91 @@ test("ignores concurrent microphone toggles until the current toggle finishes", 
   expect(mockLocalParticipant.setMicrophoneEnabled).toHaveBeenCalledTimes(2)
 })
 
+test("disables the microphone button while its toggle is pending", async () => {
+  const pendingToggle = createDeferred()
+  mockLocalParticipant.setMicrophoneEnabled.mockReturnValue(
+    pendingToggle.promise,
+  )
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Mute microphone")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    pendingToggle.resolve()
+    await pendingToggle.promise
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
+test("re-enables the microphone button after a failed toggle", async () => {
+  jest.spyOn(Alert, "alert").mockImplementation()
+  jest.spyOn(console, "error").mockImplementation()
+  let rejectToggle: (error: Error) => void = noop
+  const pendingToggle = new Promise<void>((_, reject) => {
+    rejectToggle = reject
+  })
+  mockLocalParticipant.setMicrophoneEnabled.mockReturnValue(pendingToggle)
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Mute microphone")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    rejectToggle(new Error("microphone failed"))
+    await pendingToggle.catch(noop)
+  })
+
+  expect(
+    view.getByLabelText("Mute microphone").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
+test("dims the microphone button when disabled", async () => {
+  const disabled = await render(
+    <MicrophoneControl
+      isMuted={false}
+      onToggleMute={noop}
+      disabled
+      isDropdownVisible={false}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
+    />,
+  )
+  const enabled = await render(
+    <MicrophoneControl
+      isMuted={false}
+      onToggleMute={noop}
+      disabled={false}
+      isDropdownVisible={false}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
+    />,
+  )
+
+  expect(disabled.getByLabelText("Mute microphone")).toHaveStyle({
+    opacity: 0.4,
+  })
+  expect(enabled.getByLabelText("Mute microphone")).toHaveStyle({
+    opacity: 1,
+  })
+})
+
 test("ignores concurrent camera toggles until the current toggle finishes", async () => {
   const pendingToggle = createDeferred()
   mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle.promise)
@@ -163,6 +252,89 @@ test("ignores concurrent camera toggles until the current toggle finishes", asyn
   await fireEvent.press(view.getByLabelText("Turn on camera"))
 
   expect(mockLocalParticipant.setCameraEnabled).toHaveBeenCalledTimes(2)
+})
+
+test("disables the camera button while its toggle is pending", async () => {
+  const pendingToggle = createDeferred()
+  mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle.promise)
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Turn on camera")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    pendingToggle.resolve()
+    await pendingToggle.promise
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
+test("re-enables the camera button after a failed toggle", async () => {
+  jest.spyOn(Alert, "alert").mockImplementation()
+  jest.spyOn(console, "error").mockImplementation()
+  let rejectToggle: (error: Error) => void = noop
+  const pendingToggle = new Promise<void>((_, reject) => {
+    rejectToggle = reject
+  })
+  mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle)
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Turn on camera")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    rejectToggle(new Error("camera failed"))
+    await pendingToggle.catch(noop)
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
+test("dims the camera button when disabled", async () => {
+  const disabled = await render(
+    <CameraControl
+      isVideoEnabled={false}
+      onToggleVideo={noop}
+      disabled
+      isDropdownVisible={false}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
+    />,
+  )
+  const enabled = await render(
+    <CameraControl
+      isVideoEnabled={false}
+      onToggleVideo={noop}
+      disabled={false}
+      isDropdownVisible={false}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
+    />,
+  )
+
+  expect(disabled.getByLabelText("Turn on camera")).toHaveStyle({
+    opacity: 0.4,
+  })
+  expect(enabled.getByLabelText("Turn on camera")).toHaveStyle({
+    opacity: 1,
+  })
 })
 
 test("alerts when the microphone toggle fails", async () => {

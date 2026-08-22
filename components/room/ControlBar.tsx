@@ -19,7 +19,9 @@ export const ControlBar = () => {
   const { localParticipant, isCameraEnabled, isMicrophoneEnabled } =
     useLocalParticipant()
   const isTogglingMicrophone = useRef<boolean>(false)
+  const [isMicrophoneToggling, setIsMicrophoneToggling] = useState(false)
   const isTogglingCamera = useRef<boolean>(false)
+  const [isCameraToggling, setIsCameraToggling] = useState(false)
   const [openDeviceDropdown, setOpenDeviceDropdown] =
     useState<DeviceDropdownSource | null>(null)
   const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false)
@@ -35,6 +37,7 @@ export const ControlBar = () => {
     if (isTogglingMicrophone.current) return
 
     isTogglingMicrophone.current = true
+    setIsMicrophoneToggling(true)
 
     try {
       await localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
@@ -43,6 +46,7 @@ export const ControlBar = () => {
       Alert.alert("Error", "Failed to toggle microphone")
     } finally {
       isTogglingMicrophone.current = false
+      setIsMicrophoneToggling(false)
     }
   }, [localParticipant, isMicrophoneEnabled])
 
@@ -50,6 +54,7 @@ export const ControlBar = () => {
     if (isTogglingCamera.current) return
 
     isTogglingCamera.current = true
+    setIsCameraToggling(true)
 
     try {
       await localParticipant.setCameraEnabled(!isCameraEnabled)
@@ -58,6 +63,7 @@ export const ControlBar = () => {
       Alert.alert("Error", "Failed to toggle camera")
     } finally {
       isTogglingCamera.current = false
+      setIsCameraToggling(false)
     }
   }, [localParticipant, isCameraEnabled])
 
@@ -88,6 +94,7 @@ export const ControlBar = () => {
         <MicrophoneControl
           isMuted={!isMicrophoneEnabled}
           onToggleMute={toggleMute}
+          disabled={isMicrophoneToggling}
           isDropdownVisible={openDeviceDropdown === Track.Source.Microphone}
           onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Microphone)}
           onCloseDropdown={() => setOpenDeviceDropdown(null)}
@@ -97,6 +104,7 @@ export const ControlBar = () => {
         <CameraControl
           isVideoEnabled={isCameraEnabled}
           onToggleVideo={toggleVideo}
+          disabled={isCameraToggling}
           isDropdownVisible={openDeviceDropdown === Track.Source.Camera}
           onToggleDropdown={() => toggleDeviceDropdown(Track.Source.Camera)}
           onCloseDropdown={() => setOpenDeviceDropdown(null)}
