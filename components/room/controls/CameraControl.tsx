@@ -40,6 +40,8 @@ interface CameraControlProps {
   isVideoEnabled: boolean
   // Toggles the local camera on/off
   onToggleVideo: VoidFunction
+  // Whether the video toggle is mid-flight and should reject taps
+  disabled: boolean
   // Whether the camera device dropdown is currently open
   isDropdownVisible: boolean
   // Opens/closes the camera device dropdown
@@ -51,6 +53,7 @@ interface CameraControlProps {
 export const CameraControl = ({
   isVideoEnabled,
   onToggleVideo,
+  disabled,
   isDropdownVisible,
   onToggleDropdown,
   onCloseDropdown,
@@ -122,8 +125,12 @@ export const CameraControl = ({
       >
         {/* Camera button */}
         <TouchableOpacity
-          style={styles.cameraButton}
+          style={[
+            styles.cameraButton,
+            disabled ? styles.cameraButtonDisabled : undefined,
+          ]}
           onPress={onToggleVideo}
+          disabled={disabled}
           accessibilityLabel={
             isVideoEnabled ? "Turn off camera" : "Turn on camera"
           }
@@ -205,6 +212,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: BORDER_RADIUSES.pill,
     justifyContent: "center",
     alignItems: "center",
+  },
+  cameraButtonDisabled: {
+    opacity: 0.4,
   },
   dropdownButton: {
     backgroundColor: BACKGROUND_COLORS.secondary,

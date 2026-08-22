@@ -220,6 +220,59 @@ test("ignores concurrent camera toggles until the current toggle finishes", asyn
   expect(mockLocalParticipant.setCameraEnabled).toHaveBeenCalledTimes(2)
 })
 
+test("disables the camera button while its toggle is pending", async () => {
+  const pendingToggle = createDeferred()
+  mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle.promise)
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Turn on camera")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    pendingToggle.resolve()
+    await pendingToggle.promise
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
+test("re-enables the camera button after a failed toggle", async () => {
+  jest.spyOn(Alert, "alert").mockImplementation()
+  jest.spyOn(console, "error").mockImplementation()
+  let rejectToggle: (error: Error) => void = () => undefined
+  const pendingToggle = new Promise<void>((_, reject) => {
+    rejectToggle = reject
+  })
+  mockLocalParticipant.setCameraEnabled.mockReturnValue(pendingToggle)
+  const view = await render(<ControlBar />)
+  const button = view.getByLabelText("Turn on camera")
+
+  await act(async () => {
+    button.props.onClick?.()
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBe(true)
+
+  await act(async () => {
+    rejectToggle(new Error("camera failed"))
+    await pendingToggle.catch(() => undefined)
+  })
+
+  expect(
+    view.getByLabelText("Turn on camera").props.accessibilityState?.disabled,
+  ).toBeFalsy()
+})
+
 test("alerts when the microphone toggle fails", async () => {
   const alert = jest.spyOn(Alert, "alert").mockImplementation()
   const consoleError = jest.spyOn(console, "error").mockImplementation()
