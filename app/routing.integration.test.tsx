@@ -9,6 +9,11 @@ jest.mock("@/services/livekitToken", () => ({
   fetchParticipantToken: jest.fn(),
 }))
 
+jest.mock("@/services/recentRooms", () => ({
+  saveRecentRoom: jest.fn(),
+  getRecentRooms: jest.fn(),
+}))
+
 jest.mock("@/services/roomSlug", () => {
   const actual = jest.requireActual("@/services/roomSlug")
 

@@ -41,6 +41,11 @@ jest.mock("@/services/livekitToken", () => ({
   fetchParticipantToken: jest.fn(),
 }))
 
+jest.mock("@/services/recentRooms", () => ({
+  saveRecentRoom: jest.fn(),
+  getRecentRooms: jest.fn(),
+}))
+
 let mockActiveRoomSlug: string | null = null
 
 jest.mock("@/services/activeRoomConnection", () => ({
