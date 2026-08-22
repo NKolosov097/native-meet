@@ -10,7 +10,7 @@ import {
 
 import { StatusBar } from "expo-status-bar"
 
-import { SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { ChevronLeftIcon } from "@/components/icons"
 import { BORDER_RADIUSES } from "@/constants/borderRadiuses"
@@ -41,6 +41,7 @@ export const JoinScreen = ({
   onJoined,
   onBack,
 }: JoinScreenProps) => {
+  const insets = useSafeAreaInsets()
   const [name, setName] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
@@ -88,7 +89,10 @@ export const JoinScreen = ({
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
-        style={styles.backButton}
+        style={[
+          styles.backButton,
+          { top: insets.top + 20, left: insets.left + 20 },
+        ]}
         onPress={onBack}
         hitSlop={10}
         accessibilityLabel="Back to room selection"
@@ -148,8 +152,6 @@ export const JoinScreen = ({
 const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
-    top: 20,
-    left: 20,
     width: 40,
     height: 40,
     justifyContent: "center",

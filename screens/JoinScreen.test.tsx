@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react-native"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 
 import { JoinScreen } from "./JoinScreen"
 
@@ -217,6 +218,28 @@ test("calls onBack when the back button is pressed", async () => {
   await fireEvent.press(screen.getByLabelText("Back to room selection"))
 
   expect(onBack).toHaveBeenCalledTimes(1)
+})
+
+test("offsets the back button below the device's safe-area inset", async () => {
+  await render(
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 320, height: 640 },
+        insets: { top: 47, left: 20, right: 0, bottom: 34 },
+      }}
+    >
+      <JoinScreen
+        roomSlug="quiet-tiger-42"
+        onJoined={jest.fn()}
+        onBack={jest.fn()}
+      />
+    </SafeAreaProvider>,
+  )
+
+  expect(screen.getByLabelText("Back to room selection")).toHaveStyle({
+    top: 67,
+    left: 40,
+  })
 })
 
 test("saves the room to recent rooms after a successful join", async () => {
