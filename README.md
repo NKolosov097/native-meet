@@ -43,10 +43,9 @@ cp .env.example .env.local
 ```
 
 | Variable                         | Meaning                                                   |
-| -------------------------------- | --------------------------------------------------------- |
+| --------------------------------- | --------------------------------------------------------- |
 | `EXPO_PUBLIC_LIVEKIT_URL`        | Project URL, for example `wss://my-project.livekit.cloud` |
 | `EXPO_PUBLIC_LIVEKIT_SANDBOX_ID` | Token server ID                                           |
-| `EXPO_PUBLIC_LIVEKIT_ROOM`       | Name of the room every participant joins                  |
 
 `.env.local` is git-ignored. If a variable is missing, the login screen says
 which one and the "Join" button stays disabled.
@@ -88,12 +87,9 @@ eas build --platform ios --profile development
 ## Usage
 
 1. Start the app
-2. Enter your name
-3. Press "Join" — the app requests an access token and joins the room from
-   `EXPO_PUBLIC_LIVEKIT_ROOM`
-
-Participants with the same name do not clash: the display name is what you
-typed, while the LiveKit identity gets a random suffix.
+2. Enter a room code to join an existing room, or tap "Create a new room"
+3. Enter your name
+4. Press "Join" — the app requests an access token and joins that room
 
 ## Configuration
 
@@ -125,27 +121,17 @@ The project is configured with:
 
 ```
 native-meet/
-├── App.tsx              # Main app component (TypeScript)
-├── screens/             # App screens
-│   └── JoinScreen.tsx   # Login screen with the participant name input
+├── app/                 # expo-router routes
+│   ├── _layout.tsx      # Root layout: providers, deep-link handling
+│   ├── index.tsx        # Home screen: join or create a room by slug
+│   └── [slug].tsx       # Per-room screen: join form + video call
+├── screens/             # Reusable screen components
+│   └── JoinScreen.tsx   # Name-entry form, shown by app/[slug].tsx
 ├── components/          # UI components
 │   └── room/            # Video call screen and its controls
-├── services/            # External services
-│   └── livekitToken.ts  # Access token fetching from the token server
-├── constants/           # Colors and environment configuration
-│   ├── colors.ts
-│   └── env.ts
-├── types/               # TypeScript types
-│   └── index.ts         # Core interfaces and types
-├── .env.example         # Template for .env.local
-├── app.json             # Expo configuration
-├── tsconfig.json        # TypeScript configuration
-├── package.json         # Project dependencies
-├── assets/              # App assets
-│   ├── icon.png
-│   ├── splash-icon.png
-│   └── ...
-└── README.md            # Documentation
+├── services/            # External services and pure utilities
+│   ├── livekitToken.ts  # Access token fetching from the token server
+│   └── roomSlug.ts      # Slug generation and validation
 ```
 
 ## TypeScript
