@@ -1,9 +1,7 @@
 const { registerGlobals } = require("@livekit/react-native")
 
-// registerGlobals() must run before expo-router boots the first route, so
-// this uses require() instead of import: ES import statements are hoisted
-// above this file's own statements, which would run expo-router/entry (and
-// start rendering) before LiveKit's WebRTC globals exist.
+// Uses require(), not import: ES imports hoist above this file's own
+// statements, which would boot expo-router before WebRTC globals exist.
 registerGlobals()
 
 require("expo-router/entry")

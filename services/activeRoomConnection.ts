@@ -8,10 +8,8 @@ export interface ActiveRoomRegistration {
   onForcedDisconnect: VoidFunction
 }
 
-// Set by the currently connected room (see
-// components/room/useRegisterActiveRoomDisconnect.ts) so app/_layout.tsx can
-// disconnect it from outside the LiveKit context tree when a new deep link
-// arrives for a different room.
+// Set by the currently connected room so app/_layout.tsx can disconnect it
+// from outside the LiveKit context tree when a new deep link arrives.
 let activeRegistration: ActiveRoomRegistration | null = null
 
 export const registerActiveRoom = (
@@ -37,12 +35,9 @@ export const unregisterActiveRoom = (
   }
 }
 
-// Disconnects the active room before the router navigates to `nextSlug`.
-// A link to the room that is already active is a no-op — there is nothing to
-// tear down and killing the call would only interrupt it. Otherwise the room
-// is told that this disconnect was forced (so its screen leaves navigation to
-// the router) and the slot is released before awaiting, so the same stale
-// handler can never be invoked twice.
+// Disconnects the active room before the router navigates to `nextSlug`. A
+// link to the already-active room is a no-op; otherwise the room is told the
+// disconnect was forced, and the slot released, before awaiting.
 export const disconnectActiveRoom = async (nextSlug: string): Promise<void> => {
   const registration = activeRegistration
 
@@ -53,5 +48,9 @@ export const disconnectActiveRoom = async (nextSlug: string): Promise<void> => {
   activeRegistration = null
   registration.onForcedDisconnect()
 
-  await registration.disconnect()
+  try {
+    await registration.disconnect()
+  } catch (error) {
+    console.error("Error disconnecting the active room: ", error)
+  }
 }

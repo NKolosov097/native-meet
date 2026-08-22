@@ -83,6 +83,21 @@ test("stops calling a handler after its own registration is cleared", async () =
   expect(roomA.disconnect).not.toHaveBeenCalled()
 })
 
+test("logs a failed disconnect instead of rejecting", async () => {
+  const consoleError = jest.spyOn(console, "error").mockImplementation()
+  const roomA = registration("room-a")
+  roomA.disconnect.mockRejectedValue(new Error("disconnect failed"))
+  registerActiveRoom(roomA)
+
+  await expect(disconnectActiveRoom("room-b")).resolves.toBeUndefined()
+
+  expect(consoleError).toHaveBeenCalledWith(
+    "Error disconnecting the active room: ",
+    expect.any(Error),
+  )
+  consoleError.mockRestore()
+})
+
 test("keeps the newer registration when an older room unregisters late", async () => {
   const roomA = registration("room-a")
   const roomB = registration("room-b")

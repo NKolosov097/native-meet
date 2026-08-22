@@ -30,6 +30,8 @@ type PressTarget = {
   }
 }
 
+const noop: VoidFunction = () => undefined
+
 const pressTwice = async (target: PressTarget): Promise<void> => {
   // RNTL's public fireEvent.press awaits the async handler, so invoking it
   // twice cannot exercise two presses in the same pending window.
@@ -44,7 +46,7 @@ const pressTwice = async (target: PressTarget): Promise<void> => {
 }
 
 const createDeferred = (): Deferred => {
-  let resolve = (): void => undefined
+  let resolve: VoidFunction = noop
   const promise = new Promise<void>(complete => {
     resolve = complete
   })
@@ -177,7 +179,7 @@ test("disables the microphone button while its toggle is pending", async () => {
 test("re-enables the microphone button after a failed toggle", async () => {
   jest.spyOn(Alert, "alert").mockImplementation()
   jest.spyOn(console, "error").mockImplementation()
-  let rejectToggle: (error: Error) => void = () => undefined
+  let rejectToggle: (error: Error) => void = noop
   const pendingToggle = new Promise<void>((_, reject) => {
     rejectToggle = reject
   })
@@ -195,7 +197,7 @@ test("re-enables the microphone button after a failed toggle", async () => {
 
   await act(async () => {
     rejectToggle(new Error("microphone failed"))
-    await pendingToggle.catch(() => undefined)
+    await pendingToggle.catch(noop)
   })
 
   expect(
@@ -207,21 +209,21 @@ test("dims the microphone button when disabled", async () => {
   const disabled = await render(
     <MicrophoneControl
       isMuted={false}
-      onToggleMute={() => undefined}
+      onToggleMute={noop}
       disabled={true}
       isDropdownVisible={false}
-      onToggleDropdown={() => undefined}
-      onCloseDropdown={() => undefined}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
     />,
   )
   const enabled = await render(
     <MicrophoneControl
       isMuted={false}
-      onToggleMute={() => undefined}
+      onToggleMute={noop}
       disabled={false}
       isDropdownVisible={false}
-      onToggleDropdown={() => undefined}
-      onCloseDropdown={() => undefined}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
     />,
   )
 
@@ -279,7 +281,7 @@ test("disables the camera button while its toggle is pending", async () => {
 test("re-enables the camera button after a failed toggle", async () => {
   jest.spyOn(Alert, "alert").mockImplementation()
   jest.spyOn(console, "error").mockImplementation()
-  let rejectToggle: (error: Error) => void = () => undefined
+  let rejectToggle: (error: Error) => void = noop
   const pendingToggle = new Promise<void>((_, reject) => {
     rejectToggle = reject
   })
@@ -297,7 +299,7 @@ test("re-enables the camera button after a failed toggle", async () => {
 
   await act(async () => {
     rejectToggle(new Error("camera failed"))
-    await pendingToggle.catch(() => undefined)
+    await pendingToggle.catch(noop)
   })
 
   expect(
@@ -309,21 +311,21 @@ test("dims the camera button when disabled", async () => {
   const disabled = await render(
     <CameraControl
       isVideoEnabled={false}
-      onToggleVideo={() => undefined}
+      onToggleVideo={noop}
       disabled={true}
       isDropdownVisible={false}
-      onToggleDropdown={() => undefined}
-      onCloseDropdown={() => undefined}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
     />,
   )
   const enabled = await render(
     <CameraControl
       isVideoEnabled={false}
-      onToggleVideo={() => undefined}
+      onToggleVideo={noop}
       disabled={false}
       isDropdownVisible={false}
-      onToggleDropdown={() => undefined}
-      onCloseDropdown={() => undefined}
+      onToggleDropdown={noop}
+      onCloseDropdown={noop}
     />,
   )
 

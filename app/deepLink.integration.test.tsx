@@ -8,12 +8,9 @@ import {
   waitFor,
 } from "expo-router/testing-library"
 
-// A stand-in for livekit-client's Room: the only behavior the deep-link flow
-// needs is that disconnect() eventually makes LiveKitRoom report a disconnect
-// while mounted, and tears the connection down silently (no onDisconnected)
-// when it happens because the LiveKitRoom wrapper itself unmounted — matching
-// @livekit/components-react's useLiveKitRoom(), which detaches its listeners
-// as part of the same unmount cleanup that calls disconnect().
+// A stand-in for livekit-client's Room: disconnect() eventually makes
+// LiveKitRoom report a disconnect while mounted, and stays silent (no
+// onDisconnected) if the wrapper itself already unmounted.
 interface FakeRoom {
   // Whether the fake room still considers itself connected
   isConnected: boolean
@@ -114,11 +111,9 @@ const { fetchParticipantToken: mockFetchParticipantToken } = jest.requireMock(
   "@/services/livekitToken",
 ) as { fetchParticipantToken: jest.Mock<Promise<string>, [string, string]> }
 
-// expo-router/testing-library installs its own expo-linking mock whose
-// addEventListener never fires, and it does so when this file imports it — too
-// late for a hoisted jest.mock of our own to survive. Spying on the mocked
-// module instance the router and app/_layout.tsx both import works regardless
-// of that ordering.
+// expo-router/testing-library's own expo-linking mock loads too late for a
+// hoisted jest.mock to survive, so this spies on the mocked module instance
+// directly — the same one _layout.tsx imports.
 const mockLinking = jest.requireMock(
   "expo-linking",
 ) as typeof import("expo-linking")
@@ -126,9 +121,8 @@ const mockLinking = jest.requireMock(
 let linkListeners: ((event: { url: string }) => void)[] = []
 let app: ReturnType<typeof renderRouter>
 
-// renderRouter's result is thenable: awaiting it flushes the first render (and
-// publishes `screen`), while the variable keeps the router-specific helpers
-// that awaiting the call directly would strip off.
+// renderRouter's result is thenable — awaiting it flushes the first render;
+// the variable keeps the router helpers that awaiting directly would strip.
 const renderApp = async (): Promise<void> => {
   app = renderRouter(
     {
@@ -158,10 +152,8 @@ const joinRoom = async (slug: string) => {
   })
 }
 
-// Delivers an incoming link the way the OS does: every "url" subscriber sees
-// it. Firing the event alone already drives expo-router's own subscription
-// (getStateFromPath -> getActionFromState -> the real StackRouter) through
-// to a navigation — nothing here needs to additionally call router.navigate.
+// Delivers a link the way the OS does: firing the "url" event alone drives
+// expo-router's own navigation, so no separate router.navigate call is needed.
 const openLink = async (url: string) => {
   await act(async () => {
     linkListeners.forEach(listener => listener({ url }))
@@ -197,12 +189,9 @@ test("stays on the room a mid-call link navigated to", async () => {
 
   await openLink("nativemeet://room-b")
 
-  // The old call is gone, and the screen the link opened is still the one in
-  // front of the user: the disconnect must not drag them back out of room B.
-  // disconnect() is called twice — once explicitly by the registry, once
-  // more by LiveKitRoom's own unmount cleanup once onForcedDisconnect clears
-  // the token and unmounts it — matching real usage, where Room.disconnect()
-  // is idempotent, so this is expected rather than a double-teardown bug.
+  // The old call is gone but room B stays on screen — disconnect() fires
+  // twice (registry + LiveKitRoom's own unmount cleanup) because
+  // Room.disconnect() is idempotent, not a double-teardown bug.
   await waitFor(() => {
     expect(mockRooms[0].disconnect).toHaveBeenCalledTimes(2)
   })
@@ -226,12 +215,9 @@ test("keeps the call alive when an unroutable link (extra path segment) points a
   await renderApp()
   await joinRoom("room-a")
 
-  // A path expo-router can't match to any screen would otherwise resolve to
-  // its auto-injected "+not-found" route, which the root layout's <Stack>
-  // renders as the sole focused route — unmounting the whole navigation
-  // tree, live call included, without ever going through the registry.
-  // +native-intent.ts collapses this to the one slug _layout.tsx already
-  // reasoned about, so it never reaches "+not-found" at all.
+  // An unmatched path would otherwise hit the auto-injected "+not-found"
+  // route, unmounting the whole nav tree (live call included) outside the
+  // registry's reach — +native-intent.ts collapses it to the known slug first.
   await openLink("nativemeet://room-a/extra")
 
   expect(mockRooms[0].disconnect).not.toHaveBeenCalled()
@@ -258,14 +244,9 @@ test("keeps the same call alive when a non-canonical link to the room already op
   await renderApp()
   await joinRoom("room-a")
 
-  // app/+native-intent.ts rewrites "Room-A" to the canonical "/room-a"
-  // before the router ever sees it, so this never becomes a raw, differently
-  // -spelled param the way it would without that hook (see app/[slug].test.tsx
-  // for a direct test of the [slug]-screen-level defense-in-depth that
-  // would still catch it if it ever did) — this test guards the
-  // native-intent + same-room-no-op combination end to end: the room must
-  // not be torn down and rejoined just because the link's casing didn't
-  // match the URL bar.
+  // +native-intent.ts rewrites "Room-A" to the canonical "/room-a" first, so
+  // this guards the native-intent + same-room-no-op path end to end: casing
+  // differences must not tear down and rejoin the active call.
   await openLink("nativemeet://Room-A")
 
   await waitFor(() => {
@@ -273,9 +254,8 @@ test("keeps the same call alive when a non-canonical link to the room already op
   })
   expect(mockRooms[0].disconnect).not.toHaveBeenCalled()
   expect(mockRooms[0].isConnected).toBe(true)
-  // A second LiveKitRoom mount would have pushed a second fake room here —
-  // this is what actually proves the call was never unmounted, not just that
-  // no code path happened to call disconnect().
+  // A second LiveKitRoom mount would push a second fake room here — proof
+  // the call was never unmounted, not just that disconnect() wasn't called.
   expect(mockRooms).toHaveLength(1)
   expect(screen.getByText("In call")).toBeVisible()
   expect(screen.queryByLabelText("Participant name")).not.toBeOnTheScreen()

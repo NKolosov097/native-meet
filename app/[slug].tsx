@@ -47,10 +47,8 @@ const Room = ({ slug }: RoomProps) => {
   const [connectionState, setConnectionState] = useState<ConnectionState>(
     () => initialConnectionState,
   )
-  // Set while the app itself is ending this call because a link to another
-  // room arrived. Read by onDisconnect to tell that case apart from the user
-  // pressing "leave": the router is already navigating to the linked room, so
-  // navigating again here would bounce the user straight back out of it.
+  // Set while the app itself ends this call (a link to another room arrived).
+  // Lets onDisconnect skip its own navigation — the router is already there.
   const isDisconnectForcedRef = useRef<boolean>(false)
 
   const onJoined = useCallback((token: string): void => {
@@ -122,13 +120,9 @@ export default function RoomScreen() {
   // to the one room a home-screen user reaches by typing the same text.
   const slug = slugify(rawSlug ?? "")
   const isCanonical = slug === rawSlug
-  // Defense-in-depth, not the primary guard: app/+native-intent.ts already
-  // canonicalizes every incoming system link before the router ever sees it,
-  // so in practice this screen never receives a non-canonical param that way.
-  // It still matters for any other route to this screen with a raw param —
-  // if one ever did produce a non-canonical duplicate of the room already
-  // open elsewhere in the stack, this instance is a duplicate to dismiss, not
-  // a fresh room to join.
+  // Defense-in-depth: +native-intent.ts already canonicalizes real links, but
+  // any other route to this screen with a raw param could still produce a
+  // non-canonical duplicate of a room already open elsewhere — dismiss it.
   const isDuplicateOfActiveRoom =
     !isCanonical && slug !== "" && slug === getActiveRoomSlug()
 
@@ -152,10 +146,7 @@ export default function RoomScreen() {
     return null
   }
 
-  // Keyed by the canonical slug so every piece of per-room state (token, join
-  // form, active room registration) is rebuilt from scratch when the room
-  // actually changes, even when expo-router reuses this screen instance
-  // instead of remounting it — but stays mounted across a non-canonical link
-  // to this same room, since the key does not change.
+  // Keyed by the canonical slug so per-room state rebuilds when the room
+  // actually changes, but stays mounted for a non-canonical link to the same one.
   return <Room key={slug} slug={slug} />
 }

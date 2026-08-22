@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react-native"
+import { render, screen } from "@testing-library/react-native"
 
 import RootLayout from "./_layout"
 
@@ -70,23 +70,6 @@ test("passes an empty slug for a link that names no room", async () => {
   handler({ url: "nativemeet://" })
 
   expect(mockDisconnectActiveRoom).toHaveBeenCalledWith("")
-})
-
-test("reports a failed disconnect without throwing at the link handler", async () => {
-  const consoleError = jest.spyOn(console, "error").mockImplementation()
-  mockDisconnectActiveRoom.mockRejectedValue(new Error("disconnect failed"))
-  await render(<RootLayout />)
-  const handler = mockAddEventListener.mock.calls[0][1] as LinkHandler
-
-  handler({ url: "nativemeet://room-b" })
-
-  await waitFor(() => {
-    expect(consoleError).toHaveBeenCalledWith(
-      "Failed to disconnect the active room: ",
-      expect.any(Error),
-    )
-  })
-  consoleError.mockRestore()
 })
 
 test("unsubscribes on unmount", async () => {

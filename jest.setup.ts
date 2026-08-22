@@ -1,12 +1,8 @@
 jest.mock("expo-status-bar", () => ({ StatusBar: () => null }))
 
-// react-native-safe-area-context ships an official Jest mock that reuses the
-// package's real SafeAreaInsetsContext/SafeAreaFrameContext (so consumers
-// like expo-router's SafeAreaProviderCompat, which reads the context via
-// React's `use()`, get a context object that matches the one the mocked
-// SafeAreaProvider writes to) while rendering children synchronously with
-// default (all-zero) insets instead of waiting on a native `onInsetsChange`
-// event that never fires in tests.
+// The official RN safe-area-context Jest mock renders children synchronously
+// with all-zero insets and shares its real context with expo-router's
+// SafeAreaProviderCompat, instead of waiting on a native event that never fires.
 jest.mock(
   "react-native-safe-area-context",
   () => require("react-native-safe-area-context/jest/mock").default,

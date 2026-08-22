@@ -205,20 +205,16 @@ test("redirects to the canonical slug when the route param is not canonical", as
   await render(<RoomScreen />)
 
   expect(mockReplace).toHaveBeenCalledWith("/team-sync")
-  // The redirect only fixes the URL bar; it must not block the canonical
-  // room's join form from showing right away (see the deep-link integration
-  // test for why: gating this on canonicalness would tear down and rejoin an
-  // already-active call whenever a link to it arrives in a non-canonical form).
+  // The redirect only fixes the URL bar — it must not delay the join form,
+  // or a non-canonical link to the active room would tear down and rejoin it.
   expect(screen.getByText(/team-sync/)).toBeVisible()
   expect(screen.getByLabelText("Participant name")).toBeVisible()
   expect(mockFetchParticipantToken).not.toHaveBeenCalled()
 })
 
 test("dismisses itself instead of joining when its canonical slug duplicates the room already active", async () => {
-  // In production app/+native-intent.ts canonicalizes every system link
-  // before the router ever sees it, so this branch has no reachable trigger
-  // there — this test exercises it directly as defense-in-depth for any
-  // other route to this screen with a non-canonical param.
+  // +native-intent.ts already canonicalizes real links; this exercises the
+  // screen's own defense-in-depth directly with a non-canonical param.
   mockSlug = "Team Sync"
   mockActiveRoomSlug = "team-sync"
 

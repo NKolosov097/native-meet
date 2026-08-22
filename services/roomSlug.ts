@@ -41,12 +41,8 @@ const decodeSegment = (segment: string): string => {
 }
 
 // Canonical slug an incoming deep link (`nativemeet://<slug>`) points at, run
-// through the same slugify() a typed room code goes through so
-// `nativemeet://Team%20Sync` and a typed "Team Sync" reach the same room.
-// Returns "" for a link that names no room, for example "nativemeet://".
-// Only the app's own scheme is in scope here (universal links on a real domain
-// are deliberately deferred), so the first component after "<scheme>://" is
-// the room — expo-router routes the same component to the [slug] param.
+// through the same slugify() a typed room code goes through. Returns "" for
+// a link that names no room, e.g. "nativemeet://".
 export const roomSlugFromUrl = (url: string): string => {
   const path = url.replace(/^[a-z][a-z\d+.-]*:\/\//i, "").split(/[?#]/)[0]
   const [segment] = path.split("/").filter(part => part !== "")

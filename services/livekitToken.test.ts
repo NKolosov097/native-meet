@@ -47,6 +47,7 @@ test("requests and returns a token for the given room and stable identity", asyn
 })
 
 test("rejects an empty token returned by the token server", async () => {
+  jest.spyOn(console, "error").mockImplementation()
   mockGetDeviceIdentity.mockResolvedValue("device-123")
   mockFetch.mockResolvedValue({ participantToken: "" })
 
@@ -56,6 +57,7 @@ test("rejects an empty token returned by the token server", async () => {
 })
 
 test("preserves token server failures", async () => {
+  jest.spyOn(console, "error").mockImplementation()
   const serverFailure = new Error("token server offline")
   mockGetDeviceIdentity.mockResolvedValue("device-123")
   mockFetch.mockRejectedValue(serverFailure)

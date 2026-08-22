@@ -1,14 +1,18 @@
 import { useEffect } from "react"
 import { LogBox } from "react-native"
 
-import * as Linking from "expo-linking"
-import { Stack } from "expo-router"
+import { addEventListener } from "expo-linking"
+import { Stack, type NativeStackNavigationOptions } from "expo-router"
 
 import { SafeAreaProvider } from "react-native-safe-area-context"
 
 import { GridPreview } from "@/components/room/grid/GridPreview"
 import { disconnectActiveRoom } from "@/services/activeRoomConnection"
 import { roomSlugFromUrl } from "@/services/roomSlug"
+
+const stackScreenOptions: NativeStackNavigationOptions = {
+  headerShown: false,
+}
 
 export default function RootLayout() {
   const isGridPreview = process.env.EXPO_PUBLIC_GRID_PREVIEW === "1"
@@ -21,14 +25,10 @@ export default function RootLayout() {
   }, [])
 
   useEffect(() => {
-    // expo-router navigates to the linked route on its own; this only tears
-    // down a call the link is taking the user away from, so no WebRTC
-    // connection is left running in the background. A link to the room that
-    // is already on screen is left alone by the registry.
-    const subscription = Linking.addEventListener("url", ({ url }) => {
-      disconnectActiveRoom(roomSlugFromUrl(url)).catch(error => {
-        console.error("Failed to disconnect the active room: ", error)
-      })
+    // Tears down a call the link is navigating away from; expo-router
+    // handles the navigation itself.
+    const subscription = addEventListener("url", ({ url }) => {
+      disconnectActiveRoom(roomSlugFromUrl(url))
     })
 
     return () => subscription.remove()
@@ -44,7 +44,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={stackScreenOptions} />
     </SafeAreaProvider>
   )
 }

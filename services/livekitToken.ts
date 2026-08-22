@@ -9,20 +9,25 @@ export const fetchParticipantToken = async (
   participantName: string,
   roomName: string,
 ): Promise<string> => {
-  const participantIdentity = await getDeviceIdentity()
+  try {
+    const participantIdentity = await getDeviceIdentity()
 
-  const response = await tokenSource.fetch(
-    {
-      roomName,
-      participantName,
-      participantIdentity,
-    },
-    true,
-  )
+    const response = await tokenSource.fetch(
+      {
+        roomName,
+        participantName,
+        participantIdentity,
+      },
+      true,
+    )
 
-  if (!response.participantToken) {
-    throw new Error("Token server returned an empty access token")
+    if (!response.participantToken) {
+      throw new Error("Token server returned an empty access token")
+    }
+
+    return response.participantToken
+  } catch (error) {
+    console.error("Error fetching participant token: ", error)
+    throw error
   }
-
-  return response.participantToken
 }

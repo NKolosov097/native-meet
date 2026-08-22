@@ -8,11 +8,9 @@ import {
   type ActiveRoomRegistration,
 } from "@/services/activeRoomConnection"
 
-// Lets app/_layout.tsx disconnect this room from outside the LiveKit
-// context tree — needed when a new deep link arrives for a different room
-// while this one is still connected in the background. The registry keeps the
-// room's slug so a link to the room already on screen is left alone, and calls
-// `onForcedDisconnect` when it is the app (not the user) ending the call.
+// Lets app/_layout.tsx disconnect this room from outside the LiveKit context
+// tree when a deep link arrives for a different room, and calls
+// `onForcedDisconnect` so the screen knows the app (not the user) ended it.
 export const useRegisterActiveRoomDisconnect = (
   slug: string,
   onForcedDisconnect: VoidFunction,
