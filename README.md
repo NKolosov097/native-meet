@@ -91,6 +91,36 @@ eas build --platform ios --profile development
 3. Enter your name
 4. Press "Join" — the app requests an access token and joins that room
 
+### Room links
+
+Every room has a shareable link under the app's own URL scheme:
+
+```
+nativemeet://<slug>
+nativemeet://team-sync
+```
+
+Opening one takes the participant straight to that room's name-entry screen,
+skipping the home screen. The slug is canonicalized exactly like a typed room
+code (lowercased, anything else collapsed into `-`), so `nativemeet://Team Sync`
+and `nativemeet://team-sync` are the same room; a link that names no room
+redirects to the home screen. A link that arrives while a call is in progress
+disconnects that call first, unless it points at the room already open.
+
+Open a link by hand to test it:
+
+```bash
+# Android (device or emulator)
+npx uri-scheme open "nativemeet://test-room" --android
+
+# iOS simulator
+xcrun simctl openurl booted "nativemeet://test-room"
+```
+
+The scheme is declared in `app.json` (`expo.scheme`), so it only reaches the
+native projects through `npx expo prebuild` — run it (or `npx expo prebuild
+--clean`) before expecting a link to open the app.
+
 ## Configuration
 
 ### Permissions
